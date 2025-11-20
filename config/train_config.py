@@ -1,6 +1,11 @@
 # train_configs.py
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
+def test_clean(df):
+    features = df.drop(columns=["Species"])
+    df_features_transformed = features * 2 + 1
+    df[features.columns] = df_features_transformed
+    return df
 
 TRAIN_CONFIG = {
     "iris":
@@ -35,7 +40,7 @@ TRAIN_CONFIG = {
         },
         "model_output": "models/sample.pkl",
         "metadata_output": "metadata/sample.json",
-        "clean_fn" : lambda x: x,
+        "clean_fn" : test_clean,
         "pipeline_steps" : [("scaler", StandardScaler())]
     }
     }
