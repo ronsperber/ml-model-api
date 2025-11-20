@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Any
 import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
@@ -36,7 +36,7 @@ def predict_labels(
         model: BaseEstimator | GridSearchCV,
         metadata: ModelMetadata,
         X : pd.DataFrame
-          ) -> list[str]:
+          ) -> list[Any]:
     """
     Return predicted labels for a dataset using the model and metadata.
 
@@ -51,7 +51,7 @@ def predict_labels(
 
     Returns
     -------
-    labels : list[str]
+    labels : list[Any]
         List of predicted labels corresponding to the original classes.
     """
     if "classes" not in metadata:
