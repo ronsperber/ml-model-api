@@ -35,3 +35,9 @@ for i, label in zip(X.index[:10], pred_labels[:10]):
 true_labels = df["Species"].tolist()
 accuracy = sum(p == t for p, t in zip(pred_labels, true_labels)) / len(true_labels)
 print(f"Accuracy on full dataset: {accuracy:.4f}")
+print("Feature importances")
+feat_df = pd.DataFrame({
+    "feature": metadata["features"],
+    "importance": metadata["feature_importances"]
+})
+print(feat_df)
