@@ -4,16 +4,20 @@
     "num__SepalLengthCm",
     "num__SepalWidthCm",
     "num__PetalLengthCm",
-    "num__PetalWidthCm"
+    "num__PetalWidthCm",
+    "num__petal_area",
+    "num__sepal_area"
   ],
   "feature_importances": [
-    0.08862329796013109,
-    0.02292483770545579,
-    0.4786007895264744,
-    0.40985107480793864
+    0.1360224770116429,
+    0.03723432107878442,
+    0.22106079025149894,
+    0.213123299847613,
+    0.3764469144809602,
+    0.016112197329500404
   ],
   "best_params": {
-    "model__n_estimators": 30
+    "model__n_estimators": 20
   },
   "test_acc": 1.0,
   "classes": [

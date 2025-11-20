@@ -1,11 +1,10 @@
 # train_configs.py
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-def test_clean(df):
-    features = df.drop(columns=["Species"])
-    df_features_transformed = features * 2 + 1
-    df[features.columns] = df_features_transformed
-    return df
+from preprocessing.cleaning import test_clean
+from preprocessing.feature_steps import petal_area_transform, sepal_area_transform
+
+
 
 TRAIN_CONFIG = {
     "iris":
@@ -41,6 +40,10 @@ TRAIN_CONFIG = {
         "model_output": "models/sample.pkl",
         "metadata_output": "metadata/sample.json",
         "clean_fn" : test_clean,
-        "pipeline_steps" : [("scaler", StandardScaler())]
+        "pipeline_steps" : [("scaler", StandardScaler())],
+        "feature_steps" : [
+            ("add_petal_area", petal_area_transform),
+            ("add_sepal_area", sepal_area_transform)
+            ]
     }
     }

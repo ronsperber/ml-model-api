@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 import argparse
 # get the config for training
 from config.train_config import TRAIN_CONFIG
-from training import train
+from training.training import train
 # set up arguments
 parser = argparse.ArgumentParser()
 parser.add_argument(
