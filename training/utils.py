@@ -36,7 +36,7 @@ def predict_labels(
         model: BaseEstimator | GridSearchCV,
         metadata: ModelMetadata,
         X : pd.DataFrame
-          ) -> list:
+          ) -> list[str]:
     """
     Return predicted labels for a dataset using the model and metadata.
 
@@ -51,7 +51,7 @@ def predict_labels(
 
     Returns
     -------
-    labels : list
+    labels : list[str]
         List of predicted labels corresponding to the original classes.
     """
     if "classes" not in metadata:
