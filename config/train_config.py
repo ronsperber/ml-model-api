@@ -1,5 +1,6 @@
 # train_configs.py
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
 
 TRAIN_CONFIG = {
     "iris":
@@ -23,16 +24,18 @@ TRAIN_CONFIG = {
         "model_output": "models/iris_model.pkl",
         "metadata_output": "metadata/iris_metadata.json",
     },
-    "min_iris_test":
+    "iris_test":
     {
         "dataset_path": "data/Iris.csv",
         "target_col": "Species",
+        "index_col": "Id",
         "model_type": RandomForestClassifier,
         "param_grid": {
             "model__n_estimators" : [20, 30]
         },
         "model_output": "models/sample.pkl",
         "metadata_output": "metadata/sample.json",
-        "clean_fn" : lambda x: x
+        "clean_fn" : lambda x: x,
+        "pipeline_steps" : [("scaler", StandardScaler())]
     }
     }

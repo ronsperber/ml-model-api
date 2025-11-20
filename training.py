@@ -43,8 +43,8 @@ def train(configs: dict) -> dict:
     [
         *feature_steps,
         ("process", preprocessor),
-        ("model", model_cls),
-        *configs.get("pipeline_steps",[])
+        *configs.get("pipeline_steps",[]),
+        ("model", model_cls)
     ]
     )
     # split into train/test
