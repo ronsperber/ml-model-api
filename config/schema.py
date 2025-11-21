@@ -8,5 +8,6 @@ class IrisFeatures(BaseModel):
     PetalWidthCm: float
 
 schemas = {
-    "iris" : IrisFeatures
+    "iris" : IrisFeatures,
+    "iris_test": IrisFeatures
 }
