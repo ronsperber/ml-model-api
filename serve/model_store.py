@@ -1,13 +1,23 @@
 import joblib
 import json
-from pydantic import BaseModel
+from fastapi import HTTPException
 from config.train_config import TRAIN_CONFIG
 
 
-class ModelStore(BaseModel):
-    models: dict = {}
-    metadata: dict = {}
-    schemas: dict = {}
+class ModelStore:
+    def __init__(self,
+                models: dict = {},
+                metadata: dict = {},
+                schemas: dict = {}
+   ):
+       self.models = models
+       self.metadata = metadata
+       self.schemas = schemas
+
+    def get_model_info(self, dataset: str):
+        if dataset not in self.models:
+            raise HTTPException(status_code=404, detail=f"Data for {dataset} not found")
+        return self.models[dataset], self.metadata[dataset], self.schemas[dataset]
 
 def load_models():
     model_dict = {}
