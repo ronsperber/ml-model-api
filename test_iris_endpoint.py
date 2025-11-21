@@ -1,13 +1,12 @@
 from fastapi import FastAPI, Query, Body, HTTPException
 import pandas as pd
 from config.schema import schemas
-from serve.model_store import ModelStore, load_models, load_metadata
+from config.train_config import TRAIN_CONFIG
+from serve.model_store import ModelStore
+model_store = ModelStore(schemas, TRAIN_CONFIG)
+model_store.load_all()
 app = FastAPI()
-model_store = ModelStore(
-    models=load_models(),
-    metadata=load_metadata(),
-    schemas=schemas
-)
+
 
 
 @app.post("/predict/")
@@ -15,7 +14,10 @@ def predict(
     features: dict = Body(...),
     dataset = Query("iris", description="Dataset chosen"),
     ):
-    model, metadata, schema = model_store.get_model_info(dataset)
+    try :
+        model, metadata, schema = model_store.get(dataset)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     try:
         validated = schema(**features)
     except Exception as e:
