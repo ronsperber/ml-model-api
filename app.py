@@ -60,7 +60,7 @@ def predict(
         # if no predict_proba exists, use the predict method to
         # get the prediction and use empty list for probabilities
         y_pred = model.predict(X)[0]
-        y_pred_proba_list = []
+        y_pred_proba_list = [0] * len(classes)
     pred_label = classes[y_pred]
     probs = {k:v for (k,v) in list(zip(classes, y_pred_proba_list))}
     logger.info(f"Model for {dataset} prediction returned")
