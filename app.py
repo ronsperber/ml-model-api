@@ -49,7 +49,9 @@ def predict(
     X = pd.DataFrame([validated.model_dump()])
     # Run prediction
     logger.info(f"Model for {dataset} making prediction")
-    y_pred = model.predict(X)
-    pred_label = classes[y_pred[0]]
+    y_pred_proba = list(model.predict_proba(X))[0]
+    y_pred = int(y_pred_proba.argmax())
+    pred_label = classes[y_pred]
+    probs = {k:v for (k,v) in list(zip(classes, y_pred_proba.tolist()))}
     logger.info(f"Model for {dataset} prediction returned")
-    return {"predicted_label": pred_label}
+    return {"predicted_label": pred_label, "predicted_probs": probs}
