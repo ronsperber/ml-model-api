@@ -49,9 +49,19 @@ def predict(
     X = pd.DataFrame([validated.model_dump()])
     # Run prediction
     logger.info(f"Model for {dataset} making prediction")
-    y_pred_proba = list(model.predict_proba(X))[0]
-    y_pred = int(y_pred_proba.argmax())
+    # if we can predict probalities do that
+    if hasattr(model, "predict_proba"):
+        y_pred_proba = list(model.predict_proba(X))[0]
+        # determine which is the predicted label
+        y_pred = int(y_pred_proba.argmax())
+        # convert the probability array to list 
+        y_pred_proba_list = y_pred_proba.tolist()
+    else:
+        # if no predict_proba exists, use the predict method to
+        # get the prediction and use empty list for probabilities
+        y_pred = model.predict(X)[0]
+        y_pred_proba_list = []
     pred_label = classes[y_pred]
-    probs = {k:v for (k,v) in list(zip(classes, y_pred_proba.tolist()))}
+    probs = {k:v for (k,v) in list(zip(classes, y_pred_proba_list))}
     logger.info(f"Model for {dataset} prediction returned")
     return {"predicted_label": pred_label, "predicted_probs": probs}
