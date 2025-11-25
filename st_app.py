@@ -54,7 +54,8 @@ if predict:
     """, unsafe_allow_html=True)
     st.markdown("### Class Probabilities")
     cols = st.columns(len(probs))
-    for (label, prob), col in zip(probs.items(), cols * 10):  # repeat cols
+    probs = dict(sorted(probs.items(), key=lambda x: x[1], reverse=True))
+    for (label, prob), col in zip(probs.items(), cols):  
         col.markdown(f"""
         <div style="
             padding: 12px;
