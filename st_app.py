@@ -39,5 +39,11 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
     return inputs
 
 payload = render_schema_form(schema, form_title = f"Input form for {model_name}")
-result = requests.post(endpoint, params={"dataset":model_name},json=payload)
-st.write(result.json())
+predict = st.button("Get prediction")
+if predict: 
+    result = requests.post(endpoint, params={"dataset":model_name},json=payload)
+    response = result.json()
+    st.write(f"Predicted class: {response["predicted_label"]}")
+    st.write("Class Probabilities")
+    for label, prob in response["predicted_probs"].items():
+        st.write(f"Label: {label} , Probability {prob:.4f}")
