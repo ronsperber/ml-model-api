@@ -1,10 +1,8 @@
-import json
 import requests
 import streamlit as st
 from typing import Type
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
-from serve.model_store import ModelStore
 from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 st.title("Model Predictions")
@@ -13,8 +11,6 @@ schema = schemas[model_name]
 config = TRAIN_CONFIG[model_name]
 endpoint = "http://127.0.0.1:8000/predict"
 payload ={}
-
-
 def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") -> dict:
     inputs = {}
     st.header(form_title)
@@ -40,10 +36,34 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
 
 payload = render_schema_form(schema, form_title = f"Input form for {model_name}")
 predict = st.button("Get prediction")
-if predict: 
-    result = requests.post(endpoint, params={"dataset":model_name},json=payload)
+
+if predict:
+    result = requests.post(endpoint, params={"dataset": model_name}, json=payload)
     response = result.json()
-    st.write(f"Predicted class: {response["predicted_label"]}")
-    st.write("Class Probabilities")
-    for label, prob in response["predicted_probs"].items():
-        st.write(f"Label: {label} , Probability {prob:.4f}")
+    probs = response["predicted_probs"]
+    st.markdown("###  Predicted Class")
+    st.markdown(f"""
+    <div style="
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #e0f7fa;
+        font-size: 20px;
+    ">
+        <b>{response['predicted_label']}</b>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("### Class Probabilities")
+    cols = st.columns(len(probs))
+    for (label, prob), col in zip(probs.items(), cols * 10):  # repeat cols
+        col.markdown(f"""
+        <div style="
+            padding: 12px;
+            border-radius: 8px;
+            background: #f4f4f4;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+        ">
+            <b>{label}</b><br>
+            Probability: <b>{prob:.4f}</b>
+        </div>
+        """, unsafe_allow_html=True)
