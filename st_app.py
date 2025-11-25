@@ -41,6 +41,7 @@ if predict:
     result = requests.post(endpoint, params={"dataset": model_name}, json=payload)
     response = result.json()
     probs = response["predicted_probs"]
+    pred_label = response["predicted_label"]
     st.markdown("###  Predicted Class")
     st.markdown(f"""
     <div style="
@@ -49,20 +50,21 @@ if predict:
         background-color: #e0f7fa;
         font-size: 20px;
     ">
-        <b>{response['predicted_label']}</b>
+        <b>{pred_label}</b>
     </div>
     """, unsafe_allow_html=True)
     st.markdown("### Class Probabilities")
     cols = st.columns(len(probs))
     probs = dict(sorted(probs.items(), key=lambda x: x[1], reverse=True))
-    for (label, prob), col in zip(probs.items(), cols):  
+    for (label, prob), col in zip(probs.items(), cols): 
+        highlight = "border: 3px solid #00bcd4;" if label == pred_label else ""
         col.markdown(f"""
         <div style="
             padding: 12px;
             border-radius: 8px;
             background: #f4f4f4;
             margin-bottom: 10px;
-            border: 1px solid #ddd;
+            {highlight};
         ">
             <b>{label}</b><br>
             Probability: <b>{prob:.4f}</b>
