@@ -7,9 +7,12 @@ from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 st.title("Model Predictions")
 model_name = st.sidebar.selectbox(label="Model name",options=list(schemas.keys()))
+mode = st.sidebar.selectbox(label="Predict mode", options=["Predict single", "Predict batch (csv)"])
 schema = schemas[model_name]
 config = TRAIN_CONFIG[model_name]
 endpoint = "http://127.0.0.1:8000/predict"
+if mode == "Predict batch (csv)":
+    endpoint += "_batch"
 payload ={}
 def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") -> dict:
     inputs = {}
@@ -33,40 +36,102 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
         inputs[field_name] = value
 
     return inputs
-
-payload = render_schema_form(schema, form_title = f"Input form for {model_name}")
-predict = st.button("Get prediction")
-
-if predict:
-    result = requests.post(endpoint, params={"dataset": model_name}, json=payload)
-    response = result.json()
-    probs = response["predicted_probs"]
-    pred_label = response["predicted_label"]
-    st.markdown("###  Predicted Class")
-    st.markdown(f"""
-    <div style="
-        padding: 10px;
-        border-radius: 8px;
-        background-color: #e0f7fa;
-        font-size: 20px;
-    ">
-        <b>{pred_label}</b>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("### Class Probabilities")
-    cols = st.columns(len(probs))
-    probs = dict(sorted(probs.items(), key=lambda x: x[1], reverse=True))
-    for (label, prob), col in zip(probs.items(), cols): 
-        highlight = "border: 3px solid #00bcd4;" if label == pred_label else ""
-        col.markdown(f"""
+if mode == "Predict single":
+    payload = render_schema_form(schema, form_title = f"Input form for {model_name}")
+    predict = st.button("Get prediction")
+    if predict:
+        result = requests.post(endpoint, params={"dataset": model_name}, json=payload)
+        response = result.json()
+        probs = response["predicted_probs"]
+        pred_label = response["predicted_label"]
+        st.markdown("###  Predicted Class")
+        st.markdown(f"""
         <div style="
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            background: #f4f4f4;
-            margin-bottom: 10px;
-            {highlight};
+            background-color: #e0f7fa;
+            font-size: 20px;
         ">
-            <b>{label}</b><br>
-            Probability: <b>{prob:.4f}</b>
+            <b>{pred_label}</b>
         </div>
         """, unsafe_allow_html=True)
+        st.markdown("### Class Probabilities")
+        cols = st.columns(len(probs))
+        probs = dict(sorted(probs.items(), key=lambda x: x[1], reverse=True))
+        for (label, prob), col in zip(probs.items(), cols): 
+            highlight = "border: 3px solid #00bcd4;" if label == pred_label else ""
+            col.markdown(f"""
+            <div style="
+                padding: 12px;
+                border-radius: 8px;
+                background: #f4f4f4;
+                margin-bottom: 10px;
+                {highlight};
+            ">
+                <b>{label}</b><br>
+                Probability: <b>{prob:.4f}</b>
+            </div>
+            """, unsafe_allow_html=True)
+else:
+    st.subheader("Upload CSV for batch prediction")
+
+    uploaded = st.file_uploader("Upload a CSV file", type=["csv"])
+
+    if uploaded is not None:
+        import pandas as pd
+
+        df = pd.read_csv(uploaded)
+
+        # Validate column names
+        required_fields = schema.model_fields.keys()
+        missing = [c for c in required_fields if c not in df.columns]
+
+        if missing:
+            st.error(f"Missing required columns: {missing}")
+        else:
+            st.success("CSV accepted! Ready to send to API.")
+
+            if st.button("Run Batch Prediction"):
+                # only send required fields
+                df = df[list(required_fields)]
+                df_dict = (df.to_dict(orient="records"))
+                payload = {"items" : df_dict}
+                #st.write(payload)
+                result = requests.post(
+                    endpoint,
+                    params={"dataset": model_name},
+                    json=payload
+                )
+                #st.write(result.json)
+                response = result.json()["response"]
+
+                # Assemble table for display
+                pred_labels = [r["predicted_label"] for r in response]
+                df_out = df.copy()
+                df_out["prediction"] = pred_labels
+
+                st.subheader("Batch Results")
+                st.dataframe(df_out)
+
+                # Expandable details per row
+                for i, row in enumerate(response):
+                    with st.expander(f"Row {i+1} — prediction: {row['predicted_label']}"):
+                        probs = row["predicted_probs"]
+                        probs = dict(sorted(probs.items(), key=lambda x: x[1], reverse=True))
+                        pred_label = row["predicted_label"]
+
+                        cols = st.columns(len(probs))
+                        for (label, prob), col in zip(probs.items(), cols):
+                            highlight = "border: 3px solid #00bcd4;" if label == pred_label else ""
+                            col.markdown(f"""
+                                <div style="
+                                    padding: 12px;
+                                    border-radius: 8px;
+                                    background: #f4f4f4;
+                                    margin-bottom: 10px;
+                                    {highlight}
+                                ">
+                                    <b>{label}</b><br>
+                                    Probability: <b>{prob:.4f}</b>
+                                </div>
+                            """, unsafe_allow_html=True)
