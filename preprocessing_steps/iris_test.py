@@ -20,7 +20,7 @@ petal_area_transform = FunctionTransformer(add_petal_area)
 sepal_area_transform = FunctionTransformer(add_sepal_area)
 clean_transform = FunctionTransformer(clean_df)
 
-iris_test_feature_steps = [
+iris_test_preprocessing_steps = [
     ("clean", clean_transform),
     ("petal_area", petal_area_transform),
     ("sepal_area", sepal_area_transform)

@@ -1,7 +1,7 @@
 import joblib
 import json
 import os
-from typing import Callable, List, Type, Any
+from typing import List, Type, Any
 from pydantic import BaseModel, Field
 import argparse
 # get the config for training
@@ -25,9 +25,8 @@ class TrainConfig(BaseModel):
     model_type : Type[Any]
     model_params :dict = Field(default={})
     param_grid : dict = Field(default={})
-    clean_fn : Callable = Field(default=(lambda x: x))
-    feature_steps : List[Any] = Field(default=[])
-    pipeline_steps : List[Any] = Field(default=[])
+    preprocessing_steps : List[Any] = Field(default=[])
+    postprocessing_steps : List[Any] = Field(default=[])
     test_size: float = 0.2
     random_state : int = 42
     min_accuracy : float = 0.95

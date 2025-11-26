@@ -2,8 +2,8 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
-from feature_steps.iris_test import iris_test_feature_steps
-from feature_steps.iris_test import clean_df, add_petal_area, add_sepal_area
+from preprocessing_steps.iris_test import iris_test_preprocessing_steps
+from preprocessing_steps.iris_test import clean_df, add_petal_area, add_sepal_area
 
 def test_test_clean():
     df = pd.DataFrame({
@@ -46,7 +46,7 @@ def test_feature_steps_pipeline():
     })
 
     # build a mini pipeline of just your feature steps
-    pipe = Pipeline(iris_test_feature_steps)
+    pipe = Pipeline(iris_test_preprocessing_steps)
     out = pipe.fit_transform(df)
 
     assert "petal_area" in out.columns
@@ -88,15 +88,15 @@ def test_pipeline_preprocessing_only():
     })
     categorical_cols =df.select_dtypes(include=["object", "string", "category"]).columns.tolist()
     numeric_cols = df.select_dtypes(include=["number", "bool"]).columns.tolist()
-    preprocessor = ColumnTransformer(
+    one_hot = ColumnTransformer(
         transformers=[
             ("categorical", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
             ("num", "passthrough", numeric_cols)
             ]
             )
     pipe = Pipeline([
-        *iris_test_feature_steps,
-        ("process", preprocessor)
+        *iris_test_preprocessing_steps,
+        ("process", one_hot)
     ])
 
 

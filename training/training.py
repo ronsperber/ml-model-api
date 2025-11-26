@@ -19,14 +19,14 @@ def train(configs: dict) -> dict:
     y = le.fit_transform(y_raw)
     # find categorical and numeric columns
     X_tmp = X.copy()
-    feature_steps = configs.get("feature_steps", [])
-    pipeline_steps = configs.get("pipeline_steps", [])
-    for _ , transformer in feature_steps:
+    preprocessing_steps = configs.get("preprocessing_steps", [])
+    postprocessing_steps = configs.get("postprocessing_steps", [])
+    for _ , transformer in preprocessing_steps:
         X_tmp = transformer.fit_transform(X_tmp)
     categorical_cols = X_tmp.select_dtypes(include=["object", "string", "category"]).columns.tolist()
     numeric_cols = X_tmp.select_dtypes(include=["number", "bool"]).columns.tolist()
     # create preprocessor to to one hot encode any non-numeric columns
-    preprocessor = ColumnTransformer(
+    one_hot=ColumnTransformer(
     transformers=[
         ("categorical", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
         ("num", "passthrough", numeric_cols)
@@ -37,9 +37,9 @@ def train(configs: dict) -> dict:
     model_cls = ModelClass(**kwargs)
     pipeline = Pipeline(
     [
-        *feature_steps,
-        ("process", preprocessor),
-        *pipeline_steps,
+        *preprocessing_steps,
+        ("one_hot", one_hot),
+        *postprocessing_steps,
         ("model", model_cls)
     ]
     )
@@ -57,7 +57,7 @@ def train(configs: dict) -> dict:
     # train model
     print("Training model...")
     model.fit(X_train, y_train)
-    feature_names = model.best_estimator_.named_steps["process"].get_feature_names_out()
+    feature_names = model.best_estimator_.named_steps["one_hot"].get_feature_names_out()
     print("Training complete.")
     acc = model.score(X_test, y_test)
     # get feature importances if the model records them

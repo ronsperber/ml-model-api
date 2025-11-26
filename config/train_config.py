@@ -1,7 +1,7 @@
 # train_configs.py
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-from feature_steps.iris_test import iris_test_feature_steps
+from preprocessing_steps.iris_test import iris_test_preprocessing_steps
 
 TRAIN_CONFIG = {
     "iris":
@@ -36,7 +36,7 @@ TRAIN_CONFIG = {
         },
         "model_output": "models/sample.pkl",
         "metadata_output": "metadata/sample.json",
-        "pipeline_steps" : [("scaler", StandardScaler())],
-        "feature_steps" : iris_test_feature_steps
+        "postprocessing_steps" : [("scaler", StandardScaler())],
+        "preprocessing_steps" : iris_test_preprocessing_steps
     }
     }
