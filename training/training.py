@@ -11,9 +11,6 @@ def train(configs: dict) -> dict:
     # if an index column specified set the index column to be the index
     if configs["index_col"] is not None:
         df = df.set_index(configs["index_col"])
-    # apply the cleaning function
-    clean_fn = configs.get("clean_fn", lambda x: x)
-    df = clean_fn(df)
     # get the feature set
     X = df.drop(columns=[configs["target_col"]])
     y_raw = df[configs["target_col"]]
@@ -21,9 +18,9 @@ def train(configs: dict) -> dict:
     le = LabelEncoder()
     y = le.fit_transform(y_raw)
     # find categorical and numeric columns
-    feature_steps = configs.get("feature_steps", [])
-    # Detect column types after feature engineering 
     X_tmp = X.copy()
+    feature_steps = configs.get("feature_steps", [])
+    pipeline_steps = configs.get("pipeline_steps", [])
     for _ , transformer in feature_steps:
         X_tmp = transformer.fit_transform(X_tmp)
     categorical_cols = X_tmp.select_dtypes(include=["object", "string", "category"]).columns.tolist()
@@ -38,12 +35,11 @@ def train(configs: dict) -> dict:
     ModelClass = configs["model_type"]
     kwargs = configs.get("model_params", {})
     model_cls = ModelClass(**kwargs)
-
     pipeline = Pipeline(
     [
         *feature_steps,
         ("process", preprocessor),
-        *configs.get("pipeline_steps",[]),
+        *pipeline_steps,
         ("model", model_cls)
     ]
     )

@@ -1,10 +1,7 @@
 # train_configs.py
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-from preprocessing.cleaning import test_clean
-from preprocessing.feature_steps import petal_area_transform, sepal_area_transform
-
-
+from feature_steps.iris_test import iris_test_feature_steps
 
 TRAIN_CONFIG = {
     "iris":
@@ -39,11 +36,7 @@ TRAIN_CONFIG = {
         },
         "model_output": "models/sample.pkl",
         "metadata_output": "metadata/sample.json",
-        "clean_fn" : test_clean,
         "pipeline_steps" : [("scaler", StandardScaler())],
-        "feature_steps" : [
-            ("add_petal_area", petal_area_transform),
-            ("add_sepal_area", sepal_area_transform)
-            ]
+        "feature_steps" : iris_test_feature_steps
     }
     }
