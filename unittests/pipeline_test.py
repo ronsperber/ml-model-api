@@ -51,8 +51,13 @@ def test_feature_steps_pipeline():
 
     assert "petal_area" in out.columns
     assert "sepal_area" in out.columns
-    assert out["petal_area"].iloc[0] == (2*1 + 1) * (2*2 + 1)
-    assert out["sepal_area"].iloc[0] == (2*3 + 1) * (2*4 + 1)
+    cleaned_sepal = df["SepalLengthCm"]*2 + 1, df["SepalWidthCm"]*2 + 1
+    cleaned_petal = df["PetalLengthCm"]*2 + 1, df["PetalWidthCm"]*2 + 1
+    expected_sepal_area = cleaned_sepal[0] * cleaned_sepal[1]
+    expected_petal_area = cleaned_petal[0] * cleaned_petal[1]
+
+    assert out["petal_area"].iloc[0] == expected_petal_area.iloc[0]
+    assert out["sepal_area"].iloc[0] == expected_sepal_area.iloc[0]
 
 
 

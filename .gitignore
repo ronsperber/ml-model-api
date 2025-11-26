@@ -5,3 +5,9 @@ experiments/.*
 app.log
 Untitled*.ipynb
 Untitled.ipynb
+# In your .gitignore
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
