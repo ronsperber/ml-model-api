@@ -3,6 +3,7 @@ import streamlit as st
 from typing import Type
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
+import pandas as pd
 from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 st.title("Model Predictions")
@@ -17,7 +18,7 @@ config = TRAIN_CONFIG[model_name]
 endpoint = "http://127.0.0.1:8000/predict"
 if mode == "Predict batch (csv)":
     endpoint += "_batch"
-
+feat_endpoint = "http://127.0.0.1:8000/feature_importances"
 def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") -> dict:
     """
     Get inputs for single entry prediction
@@ -91,7 +92,6 @@ else: # for batch predictions
     st.subheader("Upload CSV for batch prediction")
     uploaded = st.file_uploader("Upload a CSV file", type=["csv"])
     if uploaded is not None:
-        import pandas as pd
         # read in the data uploaded as a dataframe
         df = pd.read_csv(uploaded)
         # Validate column names
@@ -130,4 +130,14 @@ else: # for batch predictions
                 st.subheader("Batch Results")
                 st.dataframe(df_out.style.highlight_max(axis=1, subset=probs_df.columns),
                              width='content')
+
+get_feature_imp = st.sidebar.button("See feature importances")
+if get_feature_imp:
+   feature_imp = requests.get(feat_endpoint, params={"dataset":model_name}).json()
+   feature_df = pd.DataFrame(
+       feature_imp
+       ).sort_values("importance", ascending=False).set_index("feature")
+   styled = feature_df.style.format("{:.4f}") 
+   st.sidebar.dataframe(styled)
+    
 
