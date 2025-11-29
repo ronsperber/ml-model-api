@@ -27,7 +27,7 @@ app = FastAPI()
 logger.info("Starting endpoints")
 logger.info("Reading in info for models")
 model_store = ModelStore(schemas, TRAIN_CONFIG)
-#model_store.load_all()
+
 
 
 @app.post("/predict")
