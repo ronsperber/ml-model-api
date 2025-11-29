@@ -35,7 +35,21 @@ def predict(
     features:dict = Body(...),
     dataset:str = Query("iris", description="Dataset chosen")
     ):
+    """
+    Endpoint to predict for a single sample
+    Parameters
+    ----------
+        features : dict
+            values of all features expected by the model
+        dataset : str (default : 'Iris')
+            values for the features to be given to the model
+    Returns
+    -------
+        dict
+            label predict and probabilities predict
+    """
     try :
+        # get the model, schema, and metadata for the dataset
         entry = model_store.get(dataset)
         model = entry.model
         schema = entry.schema
@@ -44,6 +58,7 @@ def predict(
         logger.error(str(e))
         raise HTTPException(status_code=404, detail=str(e))
     try:
+        # validate the schema
         validated = schema(**features)
     except Exception as e:
         logger.error(e)
@@ -75,7 +90,23 @@ def predict_batch(
     payload: dict = Body(...),
     dataset: str = Query("iris", description="Dataset chosen")
 ):
+    """
+    Endpoint to get predictions for a batch 
+    Parameters
+    ----------
+    payload : dict
+        dictionary with one key "items"
+        value is a list of samples to predicted
+    dataset: str (default 'Iris')
+        name of dataset being used
+    Returns
+    -------
+    dict
+        one key : response
+        value is list of dicts that has predicted label, probabilities
+    """
     try :
+        # get model , schema, and metadata for dataset
         entry= model_store.get(dataset)
         model = entry.model
         schema = entry.schema
@@ -87,6 +118,7 @@ def predict_batch(
     if "items" not in payload or not isinstance(payload["items"], list):
         raise HTTPException(status_code=400, detail="Expected {'items': [...] }")
     validated_rows = []
+    # validate each row and append to a list of validated rows
     for i, row in enumerate(payload["items"]):
         try:
             validated = schema(**row)
@@ -125,6 +157,14 @@ def predict_batch(
 def feature_importances(
     dataset: str = Query("iris", description="Dataset chosen")
 ):
+    """
+    endpoint for getting feature importances
+    Parameters
+    ----------
+    dataset : str (default : 'Iris')
+        label for dataset being used
+    """
+    # get metadata for dataset
     try:
        entry = model_store.get(dataset)
        metadata = entry.metadata
