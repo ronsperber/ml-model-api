@@ -67,7 +67,7 @@ class ModelStore:
         except FileNotFoundError:
             logging.error(f"No metadata found for {key}")
 
-    def load(self,key:str)
+    def load(self,key:str):
         self.load_model(key)
         self.load_model_metadata(key)
 

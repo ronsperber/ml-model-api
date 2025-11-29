@@ -27,10 +27,10 @@ app = FastAPI()
 logger.info("Starting endpoints")
 logger.info("Reading in info for models")
 model_store = ModelStore(schemas, TRAIN_CONFIG)
-model_store.load_all()
+#model_store.load_all()
 
 
-@app.post("/predict/")
+@app.post("/predict")
 def predict(
     features:dict = Body(...),
     dataset:str = Query("iris", description="Dataset chosen")
@@ -85,7 +85,7 @@ def predict(
     logger.info(f"Model for {dataset} prediction returned")
     return {"predicted_label": pred_label, "predicted_probs": probs}
 
-@app.post("/predict_batch/")
+@app.post("/predict_batch")
 def predict_batch(
     payload: dict = Body(...),
     dataset: str = Query("iris", description="Dataset chosen")
@@ -153,7 +153,7 @@ def predict_batch(
     return {"response": response}
 
 
-@app.get("/feature_importances/")
+@app.get("/feature_importances")
 def feature_importances(
     dataset: str = Query("iris", description="Dataset chosen")
 ):
