@@ -1,10 +1,8 @@
 from sklearn.preprocessing import LabelEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
 import pandas as pd
-
+from .utils import get_feature_names_from_fitted_pipeline
 def train(configs: dict) -> dict:
     # load the data
     df = pd.read_csv(configs["dataset_path"])
@@ -18,28 +16,13 @@ def train(configs: dict) -> dict:
     le = LabelEncoder()
     y = le.fit_transform(y_raw)
     # find categorical and numeric columns
-    X_tmp = X.copy()
     preprocessing_steps = configs.get("preprocessing_steps", [])
-    postprocessing_steps = configs.get("postprocessing_steps", [])
-    for _ , transformer in preprocessing_steps:
-        X_tmp = transformer.fit_transform(X_tmp)
-    categorical_cols = X_tmp.select_dtypes(include=["object", "string", "category"]).columns.tolist()
-    numeric_cols = X_tmp.select_dtypes(include=["number", "bool"]).columns.tolist()
-    # create preprocessor to to one hot encode any non-numeric columns
-    one_hot=ColumnTransformer(
-    transformers=[
-        ("categorical", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
-        ("num", "passthrough", numeric_cols)
-    ]
-    )
     ModelClass = configs["model_type"]
     kwargs = configs.get("model_params", {})
     model_cls = ModelClass(**kwargs)
     pipeline = Pipeline(
     [
         *preprocessing_steps,
-        ("one_hot", one_hot),
-        *postprocessing_steps,
         ("model", model_cls)
     ]
     )
@@ -57,7 +40,9 @@ def train(configs: dict) -> dict:
     # train model
     print("Training model...")
     model.fit(X_train, y_train)
-    feature_names = model.best_estimator_.named_steps["one_hot"].get_feature_names_out()
+    # Extract names from best estimator
+    best_pipe = model.best_estimator_
+    feature_names = get_feature_names_from_fitted_pipeline(best_pipe, X_train)
     print("Training complete.")
     acc = model.score(X_test, y_test)
     # get feature importances if the model records them
@@ -67,7 +52,7 @@ def train(configs: dict) -> dict:
         feature_importances = model_estimator.feature_importances_.tolist()
     metadata = {
         "model_type": configs["model_type"].__name__,
-        "features" : feature_names.tolist(),
+        "features" : feature_names,
         "feature_importances" : feature_importances,
         "best_params": model.best_params_,
         "test_acc": acc,

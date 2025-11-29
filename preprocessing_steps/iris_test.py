@@ -1,4 +1,5 @@
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.preprocessing import StandardScaler
 def clean_df(df):
     df = df.copy()
     numeric_cols = df.select_dtypes("number").columns
@@ -23,5 +24,6 @@ clean_transform = FunctionTransformer(clean_df)
 iris_test_preprocessing_steps = [
     ("clean", clean_transform),
     ("petal_area", petal_area_transform),
-    ("sepal_area", sepal_area_transform)
+    ("sepal_area", sepal_area_transform),
+    ("scaling", StandardScaler())
 ]

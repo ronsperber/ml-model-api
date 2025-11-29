@@ -1,19 +1,23 @@
 {
   "model_type": "RandomForestClassifier",
   "features": [
-    "num__SepalLengthCm",
-    "num__SepalWidthCm",
-    "num__PetalLengthCm",
-    "num__PetalWidthCm"
+    "SepalLengthCm",
+    "SepalWidthCm",
+    "PetalLengthCm",
+    "PetalWidthCm",
+    "petal_area",
+    "sepal_area"
   ],
   "feature_importances": [
-    0.04544565528234953,
-    0.03028489434289965,
-    0.36263485536579154,
-    0.5616345950089593
+    0.07363808329523866,
+    0.02898418426727964,
+    0.34696161545841236,
+    0.2376709941930124,
+    0.28335051858612154,
+    0.029394604199935438
   ],
   "best_params": {
-    "model__n_estimators": 30
+    "model__n_estimators": 20
   },
   "test_acc": 1.0,
   "classes": [
