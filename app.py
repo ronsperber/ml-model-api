@@ -4,6 +4,7 @@ import pandas as pd
 from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 from serve.model_store import ModelStore
+from training.utils import get_feature_importances
 model_store = ModelStore(schemas, TRAIN_CONFIG)
 model_store.load_all()
 
@@ -35,7 +36,10 @@ def predict(
     dataset:str = Query("iris", description="Dataset chosen")
     ):
     try :
-        model, metadata, schema = model_store.get(dataset)
+        entry = model_store.get(dataset)
+        model = entry.model
+        schema = entry.schema
+        metadata = entry.metadata
     except KeyError as e:
         logger.error(str(e))
         raise HTTPException(status_code=404, detail=str(e))
@@ -72,7 +76,10 @@ def predict_batch(
     dataset: str = Query("iris", description="Dataset chosen")
 ):
     try :
-        model, metadata, schema = model_store.get(dataset)
+        entry= model_store.get(dataset)
+        model = entry.model
+        schema = entry.schema
+        metadata = entry.metadata
     except KeyError as e:
         logger.error(str(e))
         raise HTTPException(status_code=404, detail=str(e))
@@ -112,3 +119,19 @@ def predict_batch(
         response.append(obj)
     logger.info(f"Model for {dataset} prediction returned")
     return {"response": response}
+
+
+@app.get("/feature_importances/")
+def feature_importances(
+    dataset: str = Query("iris", description="Dataset chosen")
+):
+    try:
+       entry = model_store.get(dataset)
+       metadata = entry.metadata
+    except KeyError as e:
+        logger.error(str(e))
+        raise HTTPException(status_code=404, detail=str(e))
+
+    df = get_feature_importances(metadata)
+    # Return as list of dicts
+    return df.to_dict(orient="records")

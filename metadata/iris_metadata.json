@@ -1,10 +1,10 @@
 {
   "model_type": "RandomForestClassifier",
   "features": [
-    "num__SepalLengthCm",
-    "num__SepalWidthCm",
-    "num__PetalLengthCm",
-    "num__PetalWidthCm"
+    "SepalLengthCm",
+    "SepalWidthCm",
+    "PetalLengthCm",
+    "PetalWidthCm"
   ],
   "feature_importances": [
     0.11091392607642457,

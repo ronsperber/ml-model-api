@@ -52,8 +52,10 @@ def get_feature_names_from_fitted_pipeline(
 
     # Everything except the model
     preproc = fitted_pipeline[:-1]
-
-    # ---- 1. Best case: final step supports feature names ----
+    # if there's no preprocessing at all return the columns of the dataframe
+    if len(preproc.steps) == 0:
+        return list(X_train.columns)
+    # If final step supports feature names use those
     _, last_step = preproc.steps[-1]
     if hasattr(last_step, "get_feature_names_out"):
         try:
@@ -61,7 +63,7 @@ def get_feature_names_from_fitted_pipeline(
         except Exception:
             pass  # fall through to the next method
 
-    # ---- 2. Replay the preprocessing pipeline ----
+    # If not go backwards through the pipeline
     try:
         return apply_preprocessing_for_names(preproc, X_train)
     except Exception:

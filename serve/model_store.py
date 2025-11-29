@@ -1,8 +1,15 @@
 import joblib
+from dataclasses import dataclass
 import json
 import logging
+from typing import Any, Dict
 logging.basicConfig(level=logging.INFO)
 
+@dataclass
+class ModelEntry:
+    model: Any
+    metadata: Dict
+    schema: Any
 
 class ModelStore:
     def __init__(self, schemas, config):
@@ -37,5 +44,8 @@ class ModelStore:
             raise KeyError(f"Metadata for '{dataset}' not found")
         if dataset not in self.schemas:
             raise KeyError(f"Schema for '{dataset}' not found")
-        return self.models[dataset], self.metadata[dataset], self.schemas[dataset]
-
+        return ModelEntry(
+            model=self.models[dataset],
+            metadata=self.metadata[dataset],
+            schema=self.schemas[dataset],
+        )
