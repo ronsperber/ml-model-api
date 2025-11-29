@@ -5,9 +5,6 @@ from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 from serve.model_store import ModelStore
 from training.utils import get_feature_importances
-model_store = ModelStore(schemas, TRAIN_CONFIG)
-model_store.load_all()
-
 # Just configure root logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -25,10 +22,7 @@ logger.addHandler(fh)
 logger.addHandler(ch)
 app = FastAPI()
 logger.info("Starting endpoints")
-logger.info("Reading in info for models")
 model_store = ModelStore(schemas, TRAIN_CONFIG)
-
-
 
 @app.post("/predict")
 def predict(
