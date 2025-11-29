@@ -99,7 +99,6 @@ def test_pipeline_preprocessing_only():
         ("process", one_hot)
     ])
 
-
     out = pipe.fit_transform(df)
 
     assert out.shape[0] == len(df)

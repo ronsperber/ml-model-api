@@ -21,6 +21,16 @@ def apply_preprocessing_for_names(
     Replay the preprocessing pipeline (without the model)
     and recover actual column names. Safe as long as each
     step either returns a DataFrame or supports feature_names_out().
+    Parameters
+    ----------
+    preproc : Pipeline
+        pipeline used other than the model at the end
+    X_train : pd.DataFrame
+        dataframe being used to train the model
+    Returns
+    ------
+    list:
+        list of feature names
     """
     Xt = X_train.copy()
 
@@ -48,6 +58,11 @@ def get_feature_names_from_fitted_pipeline(
     - transformers that support get_feature_names_out()
     - arbitrary custom DataFrame-based transforms
     - fallbacks when structure is lost
+    Parameters
+    fitted_pipeline : Pipeline
+        pipeline that has been fit. This includes the model
+    X_train : pd.DataFrame
+        data used to train the model
     """
 
     # Everything except the model
@@ -69,7 +84,7 @@ def get_feature_names_from_fitted_pipeline(
     except Exception:
         pass
 
-    # ---- 3. Final fallback: generic names ----
+    # If nothing worked, simply try returning a numbered list of features
     try:
         Xt = preproc.transform(X_train)
         return [f"feature_{i}" for i in range(Xt.shape[1])]

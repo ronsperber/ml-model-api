@@ -1,3 +1,6 @@
+"""
+module containing class to store models
+"""
 import joblib
 from dataclasses import dataclass
 import json

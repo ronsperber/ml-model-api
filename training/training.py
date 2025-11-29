@@ -4,6 +4,16 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 import pandas as pd
 from .utils import get_feature_names_from_fitted_pipeline
 def train(configs: dict) -> dict:
+    """
+    Function to read configs for a model, train and return the model and metadata
+    Parameters
+    ----------
+    configs : dict 
+        dict that has all the configs for a particular dataset needed for training
+    Returns
+    dict
+        has two key-value pairs. model and metadata
+    """
     # load the data
     df = pd.read_csv(configs["dataset_path"])
     # if an index column specified set the index column to be the index
@@ -62,9 +72,3 @@ def train(configs: dict) -> dict:
         "model": model,
         "metadata": metadata
     }
-
-
-
-
-
-    

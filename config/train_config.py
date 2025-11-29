@@ -1,4 +1,6 @@
-# train_configs.py
+"""
+training configs for models
+"""
 from sklearn.ensemble import RandomForestClassifier
 from preprocessing_steps.iris_test import iris_test_preprocessing_steps
 

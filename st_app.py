@@ -26,7 +26,11 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
     schema : Type[BaseModel]
         the schema for the model being used
     form_title : str, default is 'Input Form'
-        title for the form"""
+        title for the form
+    Returns
+    dict
+        inputs as a dict
+    """
     inputs = {}
     st.header(form_title)
     # get inputs for each field needed for the model
@@ -48,6 +52,7 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
         inputs[field_name] = value
 
     return inputs
+
 if mode == "Predict single": #if we are only doing a single prediction
     # get the data to predict on
     payload = render_schema_form(schema, form_title = f"Input form for {model_name}")
@@ -131,6 +136,7 @@ else: # for batch predictions
                 st.dataframe(df_out.style.highlight_max(axis=1, subset=probs_df.columns),
                              width='content')
 
+# if requested show the feature importances for the model 
 get_feature_imp = st.sidebar.button("See feature importances")
 if get_feature_imp:
    feature_imp = requests.get(feat_endpoint, params={"dataset":model_name}).json()

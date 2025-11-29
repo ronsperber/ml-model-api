@@ -1,4 +1,6 @@
-# schema for various models
+"""
+schema for various models
+"""
 from pydantic import BaseModel
 
 class IrisFeatures(BaseModel):

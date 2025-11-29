@@ -1,3 +1,6 @@
+"""
+processing steps for iris_test (used to test pipeline behavior)
+"""
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import StandardScaler
 def clean_df(df):
