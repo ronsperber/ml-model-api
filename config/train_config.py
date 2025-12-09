@@ -23,7 +23,7 @@ TRAIN_CONFIG = {
 
         "test_size": 0.2,
         "random_state": 42,
-        "min_accuracy": 0.95,
+        "min_score": 0.95,
 
         "model_output": "models/iris_model.pkl",
         "metadata_output": "metadata/iris_metadata.json",
@@ -49,7 +49,7 @@ TRAIN_CONFIG = {
         "model_type": LGBMClassifier,
         "test_size": 0.2,
         "random_state": 42,
-        "min_accuracy" : 0.85,
+        "min_score" : 0.75,
         "model_params" : {
             "random_state" : 42,
             "class_weight": "balanced",
@@ -65,7 +65,7 @@ TRAIN_CONFIG = {
             }
         ,
         "grid_search_params" : {
-             "scorer" :make_scorer(fbeta_score, beta=2, pos_label=0)
+             "scoring" :make_scorer(fbeta_score, beta=2, pos_label=0)
              },
         "preprocessing_steps" : loan_steps,
         "model_output": "models/loan.pkl",

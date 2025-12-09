@@ -15,11 +15,11 @@ class LoanFeatures(BaseModel):
     credit_score: int
     loan_amount: float
     interest_rate: float
-    gender: str 
-    marital_status: str = Field(default = "Married")
-    education_level: str = Field(default = "High School")
-    employment_status: str = Field(default = "Employed")
-    loan_purpose: str = Field(default = "Other")
+    gender: str = Field(default="Male")
+    marital_status: str = Field(default="Married")
+    education_level: str = Field(default="High School")
+    employment_status: str = Field(default="Employed")
+    loan_purpose: str = Field(default="Other")
     grade_subgrade: str
 
 schemas = {

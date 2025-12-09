@@ -56,7 +56,7 @@ def train(configs: dict) -> dict:
     best_pipe = model.best_estimator_
     feature_names = get_feature_names_from_fitted_pipeline(best_pipe, X_train)
     print("Training complete.")
-    acc = model.score(X_test, y_test)
+    score = model.score(X_test, y_test)
     # get feature importances if the model records them
     feature_importances = []
     model_estimator = model.best_estimator_["model"]
@@ -67,7 +67,7 @@ def train(configs: dict) -> dict:
         "features" : feature_names,
         "feature_importances" : feature_importances,
         "best_params": model.best_params_,
-        "test_acc": acc,
+        "test_score": score,
         "classes": list(le.classes_)
     }
     return {

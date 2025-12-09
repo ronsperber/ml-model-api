@@ -15,11 +15,8 @@ dependencies:
   - requests
   - httpx
   - pydantic
-  - pydantic-core
   - pillow
   - boto3
   - pytest
-  - pip:
-      - streamlit==1.51.0
-      - protobuf==3.20.3
-
+  - streamlit
+  - protobuf=3.20.3
