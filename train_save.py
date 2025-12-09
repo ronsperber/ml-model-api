@@ -25,6 +25,7 @@ class TrainConfig(BaseModel):
     model_type : Type[Any]
     model_params :dict = Field(default={})
     param_grid : dict = Field(default={})
+    grid_search_params: dict = Field(default={})
     preprocessing_steps : List[Any] = Field(default=[])
     test_size: float = 0.2
     random_state : int = 42

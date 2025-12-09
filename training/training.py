@@ -30,6 +30,7 @@ def train(configs: dict) -> dict:
     ModelClass = configs["model_type"]
     kwargs = configs.get("model_params", {})
     model_cls = ModelClass(**kwargs)
+    grid_search_params = configs.get("grid_search_params", {})
     pipeline = Pipeline(
     [
         *preprocessing_steps,
@@ -45,7 +46,8 @@ def train(configs: dict) -> dict:
     # create the model
     model = GridSearchCV(
         pipeline,
-        configs["param_grid"]
+        configs["param_grid"],
+        **grid_search_params
     )
     # train model
     print("Training model...")
