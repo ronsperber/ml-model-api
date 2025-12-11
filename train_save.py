@@ -35,6 +35,7 @@ class TrainConfig(BaseModel):
     test_size: float = 0.2
     random_state : int = 42
     min_score : float = 0.95
+    score_label : str = "accuracy"
     model_output: str
     metadata_output: str
 # train the model and get the model and metadata
@@ -50,8 +51,10 @@ model = train_results["model"]
 metadata = train_results["metadata"]
 # get the test accuracy
 score = metadata["test_score"]
-print(f"Test score : {score:.4f}")
-if score < configs.min_score:
+score_label = list(score.keys())[0]
+score_val = score[score_label]
+print(f"Test {score_label} : {score_val:.4f}")
+if score_val < configs.min_score:
     print("Accuracy too low. Try different hyperparameters or a different model")
 else:
     # if the directories for saving don't exist, create them

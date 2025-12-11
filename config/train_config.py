@@ -50,6 +50,7 @@ TRAIN_CONFIG = {
         "test_size": 0.2,
         "random_state": 42,
         "min_score" : 0.75,
+        "score_label": "F2 for loan default",
         "model_params" : {
             "random_state" : 42,
             "class_weight": "balanced",

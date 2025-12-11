@@ -32,7 +32,9 @@
     "model__n_estimators": 300,
     "model__subsample": 0.8
   },
-  "test_score": 0.757639830846565,
+  "test_score": {
+    "F2 for loan default": 0.757639830846565
+  },
   "classes": [
     "loan default",
     "loan paid"
