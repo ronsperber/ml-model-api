@@ -1,12 +1,16 @@
 import requests
 import streamlit as st
 from typing import Type
+from dotenv import load_dotenv
+import os
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 import pandas as pd
 from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 from training.utils import get_feature_importances
+load_dotenv()
+API_HOST = os.getenv("API_HOST", "http://127.0.0.1:8000")
 st.title("Model Predictions")
 # Get the model being used to make a prediction
 model_name = st.sidebar.selectbox(label="Model name",options=list(schemas.keys()))
@@ -16,10 +20,10 @@ mode = st.sidebar.selectbox(label="Predict mode", options=["Predict single", "Pr
 schema = schemas[model_name]
 config = TRAIN_CONFIG[model_name]
 # create the endpoint string based on single vs batch
-host = "http://127.0.0.1:8000"
-predict_endpoint = f"{host}/predict"
-metadata_endpoint = f"{host}/metadata"
-predict_batch_endpoint=f"{host}/predict_batch"
+predict_endpoint = f"{API_HOST}/predict"
+metadata_endpoint = f"{API_HOST}/metadata"
+predict_batch_endpoint=f"{API_HOST}/predict_batch"
+st.caption(f"API host: {API_HOST}")
 
 @st.cache_data(show_spinner=False)
 def fetch_metadata(model_name):
