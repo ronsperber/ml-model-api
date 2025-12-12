@@ -16,11 +16,11 @@ mode = st.sidebar.selectbox(label="Predict mode", options=["Predict single", "Pr
 schema = schemas[model_name]
 config = TRAIN_CONFIG[model_name]
 # create the endpoint string based on single vs batch
-host = "http://127.0.0.1:8000/"
-predict_endpoint = f"{host}predict"
-metadata_endpoint = f"{host}metadata"
-predict_batch_endpoint=f"{host}predict_batch"
-feat_endpoint = f"{host}/feature_importances"
+host = "http://127.0.0.1:8000"
+predict_endpoint = f"{host}/predict"
+metadata_endpoint = f"{host}/metadata"
+predict_batch_endpoint=f"{host}/predict_batch"
+
 @st.cache_data(show_spinner=False)
 def fetch_metadata(model_name):
     return requests.get(metadata_endpoint, params={"dataset":model_name}).json()

@@ -147,29 +147,6 @@ def predict_batch(
     return {"response": response}
 
 
-@app.get("/feature_importances")
-def feature_importances(
-    dataset: str = Query("iris", description="Dataset chosen")
-):
-    """
-    endpoint for getting feature importances
-    Parameters
-    ----------
-    dataset : str (default : 'Iris')
-        label for dataset being used
-    """
-    # get metadata for dataset
-    try:
-       entry = model_store.get(dataset)
-       metadata = entry.metadata
-    except KeyError as e:
-        logger.error(str(e))
-        raise HTTPException(status_code=404, detail=str(e))
-
-    df = get_feature_importances(metadata)
-    # Return as list of dicts
-    return df.to_dict(orient="records")
-
 @app.get("/metadata")
 def get_metadata(
     dataset: str = Query("iris", description="Dataset chosen")
