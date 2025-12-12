@@ -6,6 +6,7 @@ from pydantic_core import PydanticUndefined
 import pandas as pd
 from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
+from training.utils import get_feature_importances
 st.title("Model Predictions")
 # Get the model being used to make a prediction
 model_name = st.sidebar.selectbox(label="Model name",options=list(schemas.keys()))
@@ -15,10 +16,14 @@ mode = st.sidebar.selectbox(label="Predict mode", options=["Predict single", "Pr
 schema = schemas[model_name]
 config = TRAIN_CONFIG[model_name]
 # create the endpoint string based on single vs batch
-endpoint = "http://127.0.0.1:8000/predict"
-if mode == "Predict batch (csv)":
-    endpoint += "_batch"
-feat_endpoint = "http://127.0.0.1:8000/feature_importances"
+host = "http://127.0.0.1:8000/"
+predict_endpoint = f"{host}predict"
+metadata_endpoint = f"{host}metadata"
+predict_batch_endpoint=f"{host}predict_batch"
+feat_endpoint = f"{host}/feature_importances"
+@st.cache_data(show_spinner=False)
+def fetch_metadata(model_name):
+    return requests.get(metadata_endpoint, params={"dataset":model_name}).json()
 def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") -> dict:
     """
     Get inputs for single entry prediction
@@ -59,7 +64,7 @@ if mode == "Predict single": #if we are only doing a single prediction
     predict = st.button("Get prediction")
     if predict:
         # get the model prediction
-        result = requests.post(endpoint, params={"dataset": model_name}, json=payload)
+        result = requests.post(predict_endpoint, params={"dataset": model_name}, json=payload)
         response = result.json()
         # get the probabilities and label
         probs = response["predicted_probs"]
@@ -115,7 +120,7 @@ else: # for batch predictions
                 payload = {"items" : df_dict}
                 # get result from this CSV
                 result = requests.post(
-                    endpoint,
+                    predict_batch_endpoint,
                     params={"dataset": model_name},
                     json=payload
                 )
@@ -139,10 +144,12 @@ else: # for batch predictions
 # if requested show the feature importances for the model 
 get_feature_imp = st.sidebar.button("See feature importances")
 if get_feature_imp:
-   feature_imp = requests.get(feat_endpoint, params={"dataset":model_name}).json()
-   feature_df = pd.DataFrame(
-       feature_imp
-       ).sort_values("importance", ascending=False).set_index("feature")
+   metadata = fetch_metadata(model_name)
+   feature_imp = metadata["feature_importances"]
+   feature_df = get_feature_importances(metadata)
+   feature_df = feature_df.sort_values(
+       "importance", ascending=False
+       ).set_index("feature")
    styled = feature_df.style.format("{:.4f}") 
    st.sidebar.dataframe(styled)
     
