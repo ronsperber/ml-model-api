@@ -156,5 +156,3 @@ if get_feature_imp:
        ).set_index("feature")
    styled = feature_df.style.format("{:.4f}") 
    st.sidebar.dataframe(styled)
-    
-
