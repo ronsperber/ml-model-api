@@ -1,6 +1,7 @@
 import requests
 import streamlit as st
-from typing import Type
+from typing import Type, get_origin, get_args
+from enum import Enum
 from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
@@ -45,13 +46,32 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
     # get inputs for each field needed for the model
     for field_name, field in schema.model_fields.items():
         field_type = field.annotation
+        # Handle Optional[T]
+        origin = get_origin(field_type)
+        if origin is not None:
+            args = get_args(field_type)
+            if len(args) == 2 and type(None) in args:
+                field_type = args[0]
         # Use default only if defined, otherwise fallback
         if field.default != PydanticUndefined:
             default = field.default
         else:
             default = None
+        # Normalize Enum default to its value
+        if isinstance(default, Enum):
+            default = default.value
+
+        if isinstance(field_type, type) and issubclass(field_type, Enum):
+            options = [e.value for e in field_type]
+            # choose default index if possible
+            index = options.index(default) if default in options else 0
+            value = st.selectbox(
+                field_name,
+                options=options,
+                index=index
+            )
         # get inputs for the model with different methods depending on type
-        if field_type in (int, float):
+        elif field_type in (int, float):
             value = st.number_input(field_name, value=default if default is not None else 0.0)
         elif field_type is bool:
             value = st.checkbox(field_name, value=default if default is not None else False)

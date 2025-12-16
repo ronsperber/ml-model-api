@@ -1,7 +1,68 @@
 """
 schema for loan data
 """
+from enum import Enum
 from pydantic import BaseModel, Field
+
+# create enum classes for each of the categorical features
+
+class Gender(str, Enum):
+    Male = "Male"
+    Female = "Female"
+    Other = "Other"
+
+
+class MaritalStatus(str, Enum):
+    Married = "Married"
+    Single = "Single"
+    Divorced = "Divorced"
+    Widowed = "Widowed"
+
+class EducationLevel(str, Enum):
+    Other = "Other"
+    HighSchool = "High School"
+    Bachelor = "Bachelor's"
+    Masters = "Master's"
+    Doctorate = "PhD"
+
+class EmploymentStatus(str, Enum):
+    SelfEmployed = "Self-Employed"
+    Employed = "Employed"
+    Unemployed = "Unemployed"
+    Retired = "Retired"
+    Student = "Student"
+
+class GradeSubgrade(str, Enum):
+    A1 = "A1"
+    A2 = "A2"
+    A3 = "A3"
+    A4 = "A4"
+    A5 = "A5"
+    B1 = "B1"
+    B2 = "B2"
+    B3 = "B3"
+    B4 = "B4"
+    B5 = "B5"
+    C1 = "C1"
+    C2 = "C2"
+    C3 = "C3"
+    C4 = "C4"
+    C5 = "C5"
+    D1 = "D1"
+    D2 = "D2"
+    D3 = "D3"
+    D4 = "D4"
+    D5 = "D5"
+    E1 = "E1"
+    E2 = "E2"
+    E3 = "E3"
+    E4 = "E4"
+    E5 = "E5"
+    F1 = "F1"
+    F2 = "F2"
+    F3 = "F3"
+    F4 = "F4"
+    F5 = "F5"
 
 class LoanFeatures(BaseModel):
     annual_income: float
@@ -9,9 +70,9 @@ class LoanFeatures(BaseModel):
     credit_score: int
     loan_amount: float
     interest_rate: float
-    gender: str = Field(default="Male")
-    marital_status: str = Field(default="Married")
-    education_level: str = Field(default="High School")
-    employment_status: str = Field(default="Employed")
+    gender: Gender = Gender.Male
+    marital_status: MaritalStatus = MaritalStatus.Married
+    education_level: EducationLevel = EducationLevel.HighSchool
+    employment_status: EmploymentStatus = EmploymentStatus.Employed
     loan_purpose: str = Field(default="Other")
-    grade_subgrade: str
+    grade_subgrade: GradeSubgrade
