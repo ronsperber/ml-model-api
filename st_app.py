@@ -28,6 +28,9 @@ st.caption(f"API host: {API_HOST}")
 
 @st.cache_data(show_spinner=False)
 def fetch_metadata(model_name):
+    """
+    get metadata for a model
+    """
     return requests.get(metadata_endpoint, params={"dataset":model_name}).json()
 def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") -> dict:
     """
@@ -179,6 +182,7 @@ else: # for batch predictions
 # if requested show the feature importances for the model 
 get_feature_imp = st.sidebar.button("See feature importances")
 if get_feature_imp:
+   # get metadata and turn feature importances into a dataframe
    metadata = fetch_metadata(model_name)
    feature_imp = metadata["feature_importances"]
    feature_df = get_feature_importances(metadata)
