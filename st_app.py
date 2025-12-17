@@ -71,10 +71,21 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
                 index=index
             )
         # get inputs for the model with different methods depending on type
-        elif field_type in (int, float):
+        elif field_type is float:
             value = st.number_input(field_name, value=default if default is not None else 0.0)
+        elif field_type is int:
+            value = st.number_input(
+                field_name,
+                value=default if default is not None else 0,
+                step=1,
+                format = "%d"
+            )
         elif field_type is bool:
-            value = st.checkbox(field_name, value=default if default is not None else False)
+            value = st.checkbox(
+                field_name,
+                value=default if default is not None else False,
+                format = "%.4f"
+                )
         else:
             value = st.text_input(field_name, value=default if default is not None else "")
 
