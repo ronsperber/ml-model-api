@@ -16,4 +16,5 @@ streamlit
 lightgbm
 xgboost
 category_encoders
+dotenv
 protobuf==3.20.3
