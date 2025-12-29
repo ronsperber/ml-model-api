@@ -12,3 +12,4 @@ Untitled.ipynb
 !.vscode/launch.json
 !.vscode/extensions.json
 .env
+*.pyc
