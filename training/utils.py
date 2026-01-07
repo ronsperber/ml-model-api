@@ -10,7 +10,7 @@ class ModelMetadata(TypedDict):
     features: List[str]
     feature_importances: List[float]
     best_params: dict
-    test_acc: float
+    test_score: List[str]
     classes: List[str]
 
 def apply_preprocessing_for_names(

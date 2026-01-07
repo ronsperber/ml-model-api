@@ -55,7 +55,7 @@ score_label = list(score.keys())[0]
 score_val = score[score_label]
 print(f"Test {score_label} : {score_val:.4f}")
 if score_val < configs.min_score:
-    print("Accuracy too low. Try different hyperparameters or a different model")
+    print(f"{score_label} too low. Try different hyperparameters or a different model")
 else:
     # if the directories for saving don't exist, create them
     os.makedirs(os.path.dirname(configs.model_output), exist_ok=True)
