@@ -1,3 +1,6 @@
+"""
+some utility functions and classes to be used
+"""
 from typing import TypedDict, List, Any
 import pandas as pd
 from sklearn.base import BaseEstimator
@@ -6,6 +9,9 @@ from sklearn.pipeline import Pipeline
 
 
 class ModelMetadata(TypedDict):
+    """
+    TypeDict of what we expect in metadata
+    """
     model_type: str
     features: List[str]
     feature_importances: List[float]

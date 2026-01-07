@@ -10,12 +10,26 @@ logging.basicConfig(level=logging.INFO)
 
 @dataclass
 class ModelEntry:
+    """
+    data class to hold model, metadata, and schema
+    """
     model: Any
     metadata: Dict
     schema: Any
 
 class ModelStore:
+    """
+    class to hold all information for models
+    """
     def __init__(self, schemas: dict, config: dict):
+        """
+        Parameters
+        ----------
+        schemas : dict
+            dictionary of schemas
+        config : dict
+            dictionary of config
+        """
         self.models = {}
         self.metadata = {}
         self.schemas = schemas
@@ -35,13 +49,23 @@ class ModelStore:
         self.load_metadata()
 
     def load_model(self, key: str):
+        """
+        loads model for key
+        Parameters
+        ----------
+        key : str
+            key for model to get
+        """
+        # when we already have the model loaded do nothing        
         if key in self.models:
             return
+        # get the filename where the model should be stored
         try:
             filename = self.config[key]["model_output"]
         except KeyError:
                 logging.error(f"No path for {key} model found")
                 return
+    # load the model in
         try:
             self.models[key] = joblib.load(filename)
             logging.info(f"Model for {key} loaded")
@@ -49,17 +73,30 @@ class ModelStore:
                 logging.warning((f"Couldn't read {filename} for {key}"))
 
     def load_models(self):
+        """
+        load all models that are listed in the config
+        """
         for key in self.config:
             self.load_model(key)
     
     def load_model_metadata(self, key:str):
+        """
+        load the metadata for the model using key
+        Parameters
+        ----------
+        key : str
+            key for which model to get
+        """
+        # When we already have it loaded, don't do anything
         if key in self.metadata: 
             return
+        # get the path to where the metadata is stored
         try:
             filename = self.config[key]["metadata_output"]
         except KeyError:
             logging.error(f"No path for metadata for {key} found")
             return
+        # store the metadata in the path
         try:
             with open(filename, "r") as f:
                 self.metadata[key] = json.load(f)
@@ -68,15 +105,37 @@ class ModelStore:
             logging.error(f"No metadata found for {key}")
 
     def load(self,key:str):
+        """
+        load both model and metadata for a particular data set
+        Parameters
+        key : str
+            key for which data set to get
+        """
         self.load_model(key)
         self.load_model_metadata(key)
 
     def load_metadata(self):
+        """
+        Load metadata for all models in the config
+        """
         for key in self.config:
             self.load_model_metadata(key)
 
-    def get(self, dataset):
+    def get(self, dataset:str):
+        """
+        retreive information stored for a particular model
+        Parameters
+        ----------
+        dataset : str
+            which data set to get information from
+        Returns
+        ModelEntry
+            contains model, schema, and metadata for that dataset
+        """
+        # load the metadata and model 
+        # note, if it's already loaded, this does nothing
         self.load(dataset)
+        # check to make sure that the model information is there
         if dataset not in self.models:
             raise KeyError(f"Model for '{dataset}' not found")
         if dataset not in self.metadata:

@@ -1,3 +1,6 @@
+"""
+module to train models on data
+"""
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -25,12 +28,17 @@ def train(configs: dict) -> dict:
     # encode the labels numerically
     le = LabelEncoder()
     y = le.fit_transform(y_raw)
-    # find categorical and numeric columns
+    # get the preprocessing steps
     preprocessing_steps = configs.get("preprocessing_steps", [])
+    # get the model type
     ModelClass = configs["model_type"]
+    # get any model parameters
     kwargs = configs.get("model_params", {})
+    # create an instance of the model type using the model parameters
     model_cls = ModelClass(**kwargs)
+    # get the grid search parameters (e.g. a scoring function)
     grid_search_params = configs.get("grid_search_params", {})
+    # create pipeline with preprocessing steps and the model
     pipeline = Pipeline(
     [
         *preprocessing_steps,

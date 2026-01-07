@@ -1,3 +1,6 @@
+"""
+preprocessing steps for loan data
+"""
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OrdinalEncoder, FunctionTransformer
 from category_encoders import TargetEncoder
