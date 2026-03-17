@@ -12,4 +12,7 @@ local
 models/
 metadata/
 *.pkl
-
+# Package build artifacts
+*.egg-info/
+dist/
+build/
