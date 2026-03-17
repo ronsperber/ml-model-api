@@ -22,7 +22,7 @@ class ModelMetadata(TypedDict):
 def apply_preprocessing_for_names(
         preproc: Pipeline,
         X_train: pd.DataFrame
-        ):
+        )->list[str]:
     """
     Replay the preprocessing pipeline (without the model)
     and recover actual column names. Safe as long as each
@@ -57,7 +57,7 @@ def apply_preprocessing_for_names(
 def get_feature_names_from_fitted_pipeline(
         fitted_pipeline: Pipeline,
         X_train: pd.DataFrame
-):
+) -> list[str]:
     """
     Extract final feature names from a fitted pipeline.
     Handles:
@@ -69,6 +69,10 @@ def get_feature_names_from_fitted_pipeline(
         pipeline that has been fit. This includes the model
     X_train : pd.DataFrame
         data used to train the model
+    Returns
+    -------
+    list 
+        list of feature names
     """
 
     # Everything except the model

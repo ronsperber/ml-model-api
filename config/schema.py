@@ -6,6 +6,5 @@ from .loan_schema import LoanFeatures
 
 schemas = {
     "iris" : IrisFeatures,
-    "iris_test": IrisFeatures,
     "loan_data": LoanFeatures
 }

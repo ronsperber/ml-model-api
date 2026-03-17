@@ -22,16 +22,22 @@ The serving layer is model-agnostic: any object with a `predict` method works. S
 ```
 ml-model-api/
 ├── config/
-│   ├── schema.py          # Pydantic schemas for each dataset (input validation)
-│   └── train_config.py    # Training configs (model type, params, paths, grid search)
+│   ├── schema.py               # Pydantic schemas for each dataset (input validation)
+│   └── train_config.py         # Training configs (model type, params, paths, grid search)
+├── preprocessing_steps/
+│   └── loan_data.py            # Custom preprocessing transformers
+├── scripts/
+│   └── train_save.py           # Training entrypoint (CLI)
 ├── serve/
-│   └── model_store.py     # ModelStore: lazy loads models, metadata, and schemas
+│   └── model_store.py          # ModelStore: lazy loads models, metadata, and schemas
 ├── training/
-│   ├── training.py        # Core train() function
-│   └── utils.py           # Pipeline utilities
-├── app.py                 # FastAPI app with /predict, /predict_batch, /metadata
-├── stapp.py               # Streamlit frontend
-└── train.py               # Training entrypoint (CLI)
+│   ├── training.py             # Core train() function
+│   └── utils.py                # Pipeline utilities
+├── unittests/
+│   └── pipeline_test.py        # Unit tests
+├── data/                       # Sample datasets (included for reproducibility)
+├── app.py                      # FastAPI app with /predict, /predict_batch, /metadata
+└── st_app.py                   # Streamlit frontend
 ```
 
 ---
@@ -41,13 +47,31 @@ ml-model-api/
 ### Install dependencies
 
 ```bash
+pip install -e .
+```
+
+Or using the requirements file:
+
+```bash
 pip install -r requirements.txt
 ```
+
+### Environment setup
+
+Copy `.env.example` to `.env`. The only setting is the API host, which defaults to `http://127.0.0.1:8000` if not set:
+
+```bash
+cp .env.example .env
+```
+
+### Data
+
+Sample datasets (Iris, loan) are included in `data/` so you can run the project immediately after cloning. To add your own dataset see [Adding a New Dataset](#adding-a-new-dataset).
 
 ### Train a model
 
 ```bash
-python train.py --config_key iris
+python scripts/train_save.py --config_key iris
 ```
 
 This will:
@@ -55,6 +79,8 @@ This will:
 - Run GridSearchCV over the defined parameter grid
 - Evaluate on a held-out test set
 - Save the model and metadata only if the test score meets the `min_score` threshold
+
+Available config keys out of the box: `iris`, `loan`
 
 ### Start the API
 
@@ -64,9 +90,13 @@ uvicorn app:app --reload
 
 ### Launch the Streamlit app
 
+In a separate terminal with the API already running:
+
 ```bash
-streamlit run stapp.py
+streamlit run st_app.py
 ```
+
+![Streamlit app screenshot](assets/streamlit_demo.png)
 
 ---
 
@@ -102,6 +132,22 @@ Batch prediction from a list of samples.
 curl -X POST "http://localhost:8000/predict_batch?dataset=iris" \
   -H "Content-Type: application/json" \
   -d '{"items": [{"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}]}'
+```
+
+**Response:**
+```json
+{
+  "response": [
+    {
+      "predicted_label": "setosa",
+      "predicted_probs": {
+        "setosa": 0.9821,
+        "versicolor": 0.0134,
+        "virginica": 0.0045
+      }
+    }
+  ]
+}
 ```
 
 ### `GET /metadata`
@@ -149,7 +195,7 @@ class MyDataSchema(BaseModel):
 Then train:
 
 ```bash
-python train.py --config_key my_dataset
+python scripts/train_save.py --config_key my_dataset
 ```
 
 The API and Streamlit frontend will automatically pick up the new dataset — no other changes needed.
@@ -161,10 +207,10 @@ The API and Streamlit frontend will automatically pick up the new dataset — no
 The Streamlit app connects to the running FastAPI backend and provides:
 
 - **Single prediction mode** — input form auto-generated from the dataset's Pydantic schema, with predicted class and per-class probabilities displayed
-- **Batch prediction mode** — upload a CSV, validate columns against the schema, run predictions, and download results with probability columns appended
+- **Batch prediction mode** — upload a CSV, validate columns against the schema, run predictions, and view results with probability columns appended
 - **Feature importances** — sidebar display of feature importances from the trained model metadata
 
-![Streamlit app screenshot](assets/streamlit_demo.png)
+The input form is fully dynamic — adding a new dataset with a new schema requires no changes to the frontend code.
 
 ---
 
@@ -178,6 +224,14 @@ The `train()` function builds a scikit-learn `Pipeline` with configurable prepro
 - **Label encoding** — target labels are encoded automatically; original class names are preserved in metadata for human-readable predictions
 
 The serving layer is intentionally decoupled from the training framework. Any model with a `predict` method (and optionally `predict_proba`) can be loaded into the `ModelStore` and served through the API.
+
+---
+
+## Running Tests
+
+```bash
+pytest unittests/
+```
 
 ---
 

@@ -87,7 +87,6 @@ def render_schema_form(schema: Type[BaseModel], form_title: str = "Input Form") 
             value = st.checkbox(
                 field_name,
                 value=default if default is not None else False,
-                format = "%.4f"
                 )
         else:
             value = st.text_input(field_name, value=default if default is not None else "")
@@ -138,7 +137,7 @@ if mode == "Predict single": #if we are only doing a single prediction
             """, unsafe_allow_html=True)
 else: # for batch predictions
     st.subheader("Upload CSV for batch prediction")
-    uploaded = st.file_uploader("Upload a CSV file", type=["csv"])
+    uploaded = st.file_uploader("Upload a CSV file", type=["csv"], key=f"uploader_{model_name}")
     if uploaded is not None:
         # read in the data uploaded as a dataframe
         df = pd.read_csv(uploaded)
@@ -177,17 +176,18 @@ else: # for batch predictions
                 df_out = pd.concat([df_out, probs_df], axis=1)
                 st.subheader("Batch Results")
                 st.dataframe(df_out.style.highlight_max(axis=1, subset=probs_df.columns),
-                             width='content')
+                             use_container_width=True)
 
 # if requested show the feature importances for the model 
 get_feature_imp = st.sidebar.button("See feature importances")
 if get_feature_imp:
-   # get metadata and turn feature importances into a dataframe
-   metadata = fetch_metadata(model_name)
-   feature_imp = metadata["feature_importances"]
-   feature_df = get_feature_importances(metadata)
-   feature_df = feature_df.sort_values(
-       "importance", ascending=False
-       ).set_index("feature")
-   styled = feature_df.style.format("{:.4f}") 
-   st.sidebar.dataframe(styled)
+    # get metadata and turn feature importances into a dataframe
+    metadata = fetch_metadata(model_name)
+    feature_imp = metadata["feature_importances"]
+    feature_df = get_feature_importances(metadata)
+    feature_df["feature"] = feature_df["feature"].str.replace(
+        r"^.*?__", "", regex=True
+)
+    feature_df = feature_df.sort_values("importance", ascending=False).set_index("feature")
+    styled = feature_df.style.format("{:.4f}")
+    st.sidebar.dataframe(styled, use_container_width=True)

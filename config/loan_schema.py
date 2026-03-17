@@ -6,33 +6,43 @@ from pydantic import BaseModel, Field
 
 # create enum classes for each of the categorical features
 
-class Gender(str, Enum):
+# create a way to make the input case insensitive
+class CaseInsensitiveEnum(str, Enum):
+    @classmethod
+    def _missing_(cls, value):
+        if isinstance(value, str):
+            for member in cls:
+                if member.value.lower() == value.lower():
+                    return member
+        return None
+
+class Gender(CaseInsensitiveEnum):
     Male = "Male"
     Female = "Female"
     Other = "Other"
 
 
-class MaritalStatus(str, Enum):
+class MaritalStatus(CaseInsensitiveEnum):
     Married = "Married"
     Single = "Single"
     Divorced = "Divorced"
     Widowed = "Widowed"
 
-class EducationLevel(str, Enum):
+class EducationLevel(CaseInsensitiveEnum):
     Other = "Other"
     HighSchool = "High School"
     Bachelor = "Bachelor's"
     Masters = "Master's"
     Doctorate = "PhD"
 
-class EmploymentStatus(str, Enum):
+class EmploymentStatus(CaseInsensitiveEnum):
     SelfEmployed = "Self-Employed"
     Employed = "Employed"
     Unemployed = "Unemployed"
     Retired = "Retired"
     Student = "Student"
 
-class GradeSubgrade(str, Enum):
+class GradeSubgrade(CaseInsensitiveEnum):
     A1 = "A1"
     A2 = "A2"
     A3 = "A3"

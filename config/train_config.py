@@ -4,7 +4,6 @@ training configs for models
 from sklearn.ensemble import RandomForestClassifier
 from lightgbm import LGBMClassifier
 from sklearn.metrics import make_scorer, fbeta_score
-from preprocessing_steps.iris_test import iris_test_preprocessing_steps
 from preprocessing_steps.loan_data import loan_steps
 
 TRAIN_CONFIG = {
@@ -27,19 +26,6 @@ TRAIN_CONFIG = {
 
         "model_output": "models/iris_model.pkl",
         "metadata_output": "metadata/iris_metadata.json",
-    },
-    "iris_test":
-    {
-        "dataset_path": "data/Iris.csv",
-        "target_col": "Species",
-        "index_col": "Id",
-        "model_type": RandomForestClassifier,
-        "param_grid": {
-            "model__n_estimators" : [20, 30]
-        },
-        "model_output": "models/sample.pkl",
-        "metadata_output": "metadata/sample.json",
-        "preprocessing_steps" : iris_test_preprocessing_steps
     },
     "loan_data":
     {
