@@ -1,11 +1,5 @@
-experiments
-experiments/*
-experiments/*.*
-experiments/.*
+experiments/
 app.log
-Untitled*.ipynb
-Untitled.ipynb
-# In your .gitignore
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -13,3 +7,9 @@ Untitled.ipynb
 !.vscode/extensions.json
 .env
 *.pyc
+local
+.pytest_cache
+models/
+metadata/
+*.pkl
+
