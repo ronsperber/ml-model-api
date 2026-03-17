@@ -1,7 +1,8 @@
 """
 some utility functions and classes to be used
 """
-from typing import TypedDict, List, Any
+
+from typing import TypedDict, Any
 import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
@@ -12,17 +13,18 @@ class ModelMetadata(TypedDict):
     """
     TypeDict of what we expect in metadata
     """
+
     model_type: str
-    features: List[str]
-    feature_importances: List[float]
+    features: list[str]
+    feature_importances: list[float]
     best_params: dict
-    test_score: List[str]
-    classes: List[str]
+    test_score: dict
+    classes: list[str]
+
 
 def apply_preprocessing_for_names(
-        preproc: Pipeline,
-        X_train: pd.DataFrame
-        )->list[str]:
+    preproc: Pipeline, X_train: pd.DataFrame
+) -> list[str]:
     """
     Replay the preprocessing pipeline (without the model)
     and recover actual column names. Safe as long as each
@@ -54,9 +56,9 @@ def apply_preprocessing_for_names(
 
     return Xt.columns.tolist()
 
+
 def get_feature_names_from_fitted_pipeline(
-        fitted_pipeline: Pipeline,
-        X_train: pd.DataFrame
+    fitted_pipeline: Pipeline, X_train: pd.DataFrame
 ) -> list[str]:
     """
     Extract final feature names from a fitted pipeline.
@@ -65,13 +67,14 @@ def get_feature_names_from_fitted_pipeline(
     - arbitrary custom DataFrame-based transforms
     - fallbacks when structure is lost
     Parameters
+    ----------
     fitted_pipeline : Pipeline
         pipeline that has been fit. This includes the model
     X_train : pd.DataFrame
         data used to train the model
     Returns
     -------
-    list 
+    list
         list of feature names
     """
 
@@ -115,18 +118,14 @@ def get_feature_importances(metadata: ModelMetadata) -> pd.DataFrame:
         dataframe with features and feature importances
     """
     feat_df = pd.DataFrame(
-        {
-            "feature" : metadata["features"],
-            "importance" : metadata["feature_importances"]
-        }
+        {"feature": metadata["features"], "importance": metadata["feature_importances"]}
     )
     return feat_df
 
+
 def predict_labels(
-        model: BaseEstimator | GridSearchCV,
-        metadata: ModelMetadata,
-        X : pd.DataFrame
-          ) -> list[Any]:
+    model: BaseEstimator | GridSearchCV, metadata: ModelMetadata, X: pd.DataFrame
+) -> list[Any]:
     """
     Return predicted labels for a dataset using the model and metadata.
 
@@ -142,7 +141,7 @@ def predict_labels(
     Returns
     -------
     labels : list[Any]
-        List of predicted labels corresponding to the original classes.
+        list of predicted labels corresponding to the original classes.
     """
     if "classes" not in metadata:
         raise ValueError("'classes' missing from metadata")
@@ -150,11 +149,12 @@ def predict_labels(
     labels = [metadata["classes"][i] for i in y_pred]
     return labels
 
+
 def labels_with_df(
-        model : BaseEstimator | GridSearchCV,
-        metadata: ModelMetadata,
-        X : pd.DataFrame,
-        pred_col : str = "predicted"
+    model: BaseEstimator | GridSearchCV,
+    metadata: ModelMetadata,
+    X: pd.DataFrame,
+    pred_col: str = "predicted",
 ) -> pd.DataFrame:
     """
     Return a DataFrame containing the original data plus predicted labels.
@@ -176,4 +176,4 @@ def labels_with_df(
         DataFrame of X with predicted labels added as a new column.
     """
     labels = predict_labels(model, metadata, X)
-    return X.assign(**{pred_col:labels})
+    return X.assign(**{pred_col: labels})

@@ -1,10 +1,12 @@
 """
 schema for loan data
 """
+
 from enum import Enum
 from pydantic import BaseModel, Field
 
 # create enum classes for each of the categorical features
+
 
 # create a way to make the input case insensitive
 class CaseInsensitiveEnum(str, Enum):
@@ -15,6 +17,7 @@ class CaseInsensitiveEnum(str, Enum):
                 if member.value.lower() == value.lower():
                     return member
         return None
+
 
 class Gender(CaseInsensitiveEnum):
     Male = "Male"
@@ -28,6 +31,7 @@ class MaritalStatus(CaseInsensitiveEnum):
     Divorced = "Divorced"
     Widowed = "Widowed"
 
+
 class EducationLevel(CaseInsensitiveEnum):
     Other = "Other"
     HighSchool = "High School"
@@ -35,12 +39,14 @@ class EducationLevel(CaseInsensitiveEnum):
     Masters = "Master's"
     Doctorate = "PhD"
 
+
 class EmploymentStatus(CaseInsensitiveEnum):
     SelfEmployed = "Self-Employed"
     Employed = "Employed"
     Unemployed = "Unemployed"
     Retired = "Retired"
     Student = "Student"
+
 
 class GradeSubgrade(CaseInsensitiveEnum):
     A1 = "A1"
@@ -73,6 +79,7 @@ class GradeSubgrade(CaseInsensitiveEnum):
     F3 = "F3"
     F4 = "F4"
     F5 = "F5"
+
 
 class LoanFeatures(BaseModel):
     annual_income: float

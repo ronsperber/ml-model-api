@@ -1,9 +1,12 @@
+# FastAPI application for ML model serving.
+# Start with: uvicorn app:app --reload
 import logging
 from fastapi import FastAPI, Query, Body, HTTPException
 import pandas as pd
 from config.schema import schemas
 from config.train_config import TRAIN_CONFIG
 from serve.model_store import ModelStore
+
 # Just configure root logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,11 +26,12 @@ app = FastAPI()
 logger.info("Starting endpoints")
 model_store = ModelStore(schemas, TRAIN_CONFIG)
 
+
 @app.post("/predict")
 def predict(
-    features:dict = Body(...),
-    dataset:str = Query("iris", description="Dataset chosen")
-    ):
+    features: dict = Body(...),
+    dataset: str = Query("iris", description="Dataset chosen"),
+) -> dict:
     """
     Endpoint to predict for a single sample
     Parameters
@@ -41,7 +45,7 @@ def predict(
         dict
             label predict and probabilities predict
     """
-    try :
+    try:
         # get the model, schema, and metadata for the dataset
         entry = model_store.get(dataset)
         model = entry.model
@@ -61,12 +65,12 @@ def predict(
     X = pd.DataFrame([validated.model_dump()])
     # Run prediction
     logger.info(f"Model for {dataset} making prediction")
-    # if we can predict probalities do that
+    # if we can predict probabilities do that
     if hasattr(model, "predict_proba"):
         y_pred_proba = list(model.predict_proba(X))[0]
         # determine which is the predicted label
         y_pred = int(y_pred_proba.argmax())
-        # convert the probability array to list 
+        # convert the probability array to list
         y_pred_proba_list = y_pred_proba.tolist()
     else:
         # if no predict_proba exists, use the predict method to
@@ -78,13 +82,14 @@ def predict(
     logger.info(f"Model for {dataset} prediction returned")
     return {"predicted_label": pred_label, "predicted_probs": probs}
 
+
 @app.post("/predict_batch")
 def predict_batch(
     payload: dict = Body(...),
-    dataset: str = Query("iris", description="Dataset chosen")
-):
+    dataset: str = Query("iris", description="Dataset chosen"),
+) -> dict:
     """
-    Endpoint to get predictions for a batch 
+    Endpoint to get predictions for a batch
     Parameters
     ----------
     payload : dict
@@ -98,9 +103,9 @@ def predict_batch(
         one key : response
         value is list of dicts that has predicted label, probabilities
     """
-    try :
+    try:
         # get model , schema, and metadata for dataset
-        entry= model_store.get(dataset)
+        entry = model_store.get(dataset)
         model = entry.model
         schema = entry.schema
         metadata = entry.metadata
@@ -122,7 +127,7 @@ def predict_batch(
     # convert to dataframe
     X = pd.DataFrame(validated_rows)
     logger.info(f"Model for {dataset} making prediction")
-    # get the classes 
+    # get the classes
     classes = metadata["classes"]
     # if we can predict probabilities do that
     if hasattr(model, "predict_proba"):
@@ -136,10 +141,10 @@ def predict_batch(
         y_proba = None
     response = []
     for i, pred_idx in enumerate(y_pred):
-        probs = y_proba[i] if y_proba is not None else []
+        probs = y_proba[i] if y_proba is not None else {}
         obj = {
             "predicted_label": classes[pred_idx],
-            "predicted_probs": dict(zip(classes, probs))
+            "predicted_probs": dict(zip(classes, probs)),
         }
         response.append(obj)
     logger.info(f"Model for {dataset} prediction returned")
@@ -147,20 +152,22 @@ def predict_batch(
 
 
 @app.get("/metadata")
-def get_metadata(
-    dataset: str = Query("iris", description="Dataset chosen")
-):
+def get_metadata(dataset: str = Query("iris", description="Dataset chosen")) -> dict:
     """
     endpoint for getting metadata
     Parameters
     ----------
     dataset : str (default : 'Iris')
         label for dataset being used
+    Returns
+    -------
+    dict
+        metadata for the requested dataset
     """
     # get metadata for dataset
     try:
-       entry = model_store.get(dataset)
-       metadata = entry.metadata
+        entry = model_store.get(dataset)
+        metadata = entry.metadata
     except KeyError as e:
         logger.error(str(e))
         raise HTTPException(status_code=404, detail=str(e))

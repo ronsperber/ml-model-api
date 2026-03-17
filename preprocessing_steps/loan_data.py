@@ -1,20 +1,22 @@
 """
 preprocessing steps for loan data
 """
+
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OrdinalEncoder, FunctionTransformer
 from category_encoders import TargetEncoder
 import pandas as pd
 import numpy as np
 
-def add_credit_inc_prod(df):
+
+def add_credit_inc_prod(df: pd.DataFrame) -> pd.DataFrame:
     """
     add column with product of credit score and income
     """
-    return df.assign(credit_income_product = df["credit_score"] * df["annual_income"])
+    return df.assign(credit_income_product=df["credit_score"] * df["annual_income"])
 
 
-def add_dti_increase(df):
+def add_dti_increase(df: pd.DataFrame) -> pd.DataFrame:
     """
     add increase to DTI (loan amount / income)
     """
@@ -24,52 +26,58 @@ def add_dti_increase(df):
     return df
 
 
-def dropcols(
-        df: pd.DataFrame,
-        columns : str | list = []
- ):
+def dropcols(df: pd.DataFrame, columns: str | list | None = None) -> pd.DataFrame:
     """
     drop columns from a list
     """
+    if columns is None:
+        columns = []
     return df.drop(columns=columns)
+
 
 # convert to transformers for pipeline
 add_credit_inc_prod_transform = FunctionTransformer(add_credit_inc_prod, validate=False)
 dti_increase_transform = FunctionTransformer(add_dti_increase, validate=False)
 # we drop loan purpose, gender and marital status as they don't correlate to the target
-drop_columns_transform = FunctionTransformer(dropcols, kw_args={"columns" : ["loan_purpose", "gender", "marital_status"]}, validate=False)
+drop_columns_transform = FunctionTransformer(
+    dropcols,
+    kw_args={"columns": ["loan_purpose", "gender", "marital_status"]},
+    validate=False,
+)
 # create ordinal transformations of grade_subgrade and education
 # first list the grade_subgrade combinations in order
-fine_grades = ['A1',
- 'A2',
- 'A3',
- 'A4',
- 'A5',
- 'B1',
- 'B2',
- 'B3',
- 'B4',
- 'B5',
- 'C1',
- 'C2',
- 'C3',
- 'C4',
- 'C5',
- 'D1',
- 'D2',
- 'D3',
- 'D4',
- 'D5',
- 'E1',
- 'E2',
- 'E3',
- 'E4',
- 'E5',
- 'F1',
- 'F2',
- 'F3',
- 'F4',
- 'F5']
+fine_grades = [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+]
 # list of education levels in order
 education_levels = ["Other", "High School", "Bachelor's", "Master's", "PhD"]
 # create the ordinal encoder
@@ -81,13 +89,13 @@ ordinal_encoder = OrdinalEncoder(categories=ordinal_categories)
 encoder = ColumnTransformer(
     transformers=[
         ("ord", ordinal_encoder, ordinal_cols),
-        ("target_enc", TargetEncoder(), ["employment_status"]), 
+        ("target_enc", TargetEncoder(), ["employment_status"]),
     ],
-    remainder="passthrough" 
+    remainder="passthrough",
 )
 loan_steps = [
     ("drop", drop_columns_transform),
     ("credit_inc_prod", add_credit_inc_prod_transform),
     ("dti_inc", dti_increase_transform),
-    ("encoding", encoder)
-    ]
+    ("encoding", encoder),
+]

@@ -1,19 +1,23 @@
 """
 module to train models on data
 """
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
 import pandas as pd
 from .utils import get_feature_names_from_fitted_pipeline
+
+
 def train(configs: dict) -> dict:
     """
     Function to read configs for a model, train and return the model and metadata
     Parameters
     ----------
-    configs : dict 
+    configs : dict
         dict that has all the configs for a particular dataset needed for training
     Returns
+    -------
     dict
         has two key-value pairs. model and metadata
     """
@@ -31,32 +35,24 @@ def train(configs: dict) -> dict:
     # get the preprocessing steps
     preprocessing_steps = configs.get("preprocessing_steps", [])
     # get the model type
-    ModelClass = configs["model_type"]
+    model_class = configs["model_type"]
     # get any model parameters
     kwargs = configs.get("model_params", {})
     # create an instance of the model type using the model parameters
-    model_cls = ModelClass(**kwargs)
+    model_cls = model_class(**kwargs)
     # get the grid search parameters (e.g. a scoring function)
     grid_search_params = configs.get("grid_search_params", {})
     # create pipeline with preprocessing steps and the model
-    pipeline = Pipeline(
-    [
-        *preprocessing_steps,
-        ("model", model_cls)
-    ]
-    )
+    pipeline = Pipeline([*preprocessing_steps, ("model", model_cls)])
     # split into train/test
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
+        X,
+        y,
         test_size=configs.get("test_size", 0.2),
-        random_state=configs.get("random_state", 42)
+        random_state=configs.get("random_state", 42),
     )
     # create the model
-    model = GridSearchCV(
-        pipeline,
-        configs["param_grid"],
-        **grid_search_params
-    )
+    model = GridSearchCV(pipeline, configs["param_grid"], **grid_search_params)
     # train model
     print("Training model...")
     model.fit(X_train, y_train)
@@ -69,17 +65,14 @@ def train(configs: dict) -> dict:
     # get feature importances if the model records them
     feature_importances = []
     model_estimator = model.best_estimator_["model"]
-    if hasattr(model_estimator,"feature_importances_"):
+    if hasattr(model_estimator, "feature_importances_"):
         feature_importances = model_estimator.feature_importances_.tolist()
     metadata = {
         "model_type": configs["model_type"].__name__,
-        "features" : feature_names,
-        "feature_importances" : feature_importances,
+        "features": feature_names,
+        "feature_importances": feature_importances,
         "best_params": model.best_params_,
         "test_score": {score_label: score},
-        "classes": list(le.classes_)
+        "classes": list(le.classes_),
     }
-    return {
-        "model": model,
-        "metadata": metadata
-    }
+    return {"model": model, "metadata": metadata}

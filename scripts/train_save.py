@@ -1,3 +1,5 @@
+# Train and save a model for a given dataset config.
+# Usage: python scripts/train_save.py --config_key <dataset_name>
 import joblib
 import json
 import os
@@ -7,42 +9,50 @@ from pydantic import BaseModel, Field
 import argparse
 import time
 
-# suppress warnings
+
+# create TrainConfig class
+# used to validate a valid TRAIN_CONFIGS[key]
+class TrainConfig(BaseModel):
+    dataset_path: str
+    index_col: str | None = None
+    target_col: str
+    model_type: Type[Any]
+    model_params: dict = Field(default_factory=dict)
+    param_grid: dict = Field(default_factory=dict)
+    grid_search_params: dict = Field(default_factory=dict)
+    preprocessing_steps: List[Any] = Field(default_factory=list)
+    test_size: float = 0.2
+    random_state: int = 42
+    min_score: float = 0.95
+    score_label: str = "accuracy"
+    model_output: str
+    metadata_output: str
+
+
+# suppress sklearn UserWarnings (e.g. convergence warnings during grid search)
 warnings.simplefilter("ignore", UserWarning)
 # get the config for training
 from config.train_config import TRAIN_CONFIG
 from training.training import train
+
 # set up arguments
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-c", "--config_key",
+    "-c",
+    "--config_key",
     default="iris",  # default value
-    help="Key of the training config to use"
+    help="Key of the training config to use",
 )
 args = parser.parse_args()
 key = args.config_key
-# create TrainConfig class 
-# used to validate a valid TRAIN_CONFIGS[key]
-class TrainConfig(BaseModel):
-    dataset_path : str
-    index_col : str | None = None
-    target_col : str
-    model_type : Type[Any]
-    model_params :dict = Field(default={})
-    param_grid : dict = Field(default={})
-    grid_search_params: dict = Field(default={})
-    preprocessing_steps : List[Any] = Field(default=[])
-    test_size: float = 0.2
-    random_state : int = 42
-    min_score : float = 0.95
-    score_label : str = "accuracy"
-    model_output: str
-    metadata_output: str
+
 # train the model and get the model and metadata
 if key in TRAIN_CONFIG:
     configs = TrainConfig(**TRAIN_CONFIG[key])
 else:
-    raise ValueError(f"{key} is not a valid key. Valid keys are {list(TRAIN_CONFIG.keys())}")
+    raise ValueError(
+        f"{key} is not a valid key. Valid keys are {list(TRAIN_CONFIG.keys())}"
+    )
 start = time.perf_counter()
 train_results = train(configs.model_dump())
 end = time.perf_counter()
