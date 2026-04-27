@@ -43,9 +43,16 @@ parser.add_argument(
     default="iris",  # default value
     help="Key of the training config to use",
 )
+parser.add_argument(
+    "-v",
+    "--verbosity",
+    type=int,
+    default=0,
+    help="verbosity of GridSearchCV",
+)
 args = parser.parse_args()
 key = args.config_key
-
+verbosity=args.verbosity
 # train the model and get the model and metadata
 if key in TRAIN_CONFIG:
     configs = TrainConfig(**TRAIN_CONFIG[key])
@@ -54,7 +61,7 @@ else:
         f"{key} is not a valid key. Valid keys are {list(TRAIN_CONFIG.keys())}"
     )
 start = time.perf_counter()
-train_results = train(configs.model_dump())
+train_results = train(configs.model_dump(), verbosity=verbosity)
 end = time.perf_counter()
 print(f"Training took {end - start:.4f} seconds")
 model = train_results["model"]

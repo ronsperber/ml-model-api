@@ -9,7 +9,7 @@ import pandas as pd
 from .utils import get_feature_names_from_fitted_pipeline
 
 
-def train(configs: dict) -> dict:
+def train(configs: dict, verbosity=0) -> dict:
     """
     Function to read configs for a model, train and return the model and metadata
     Parameters
@@ -42,6 +42,7 @@ def train(configs: dict) -> dict:
     model_cls = model_class(**kwargs)
     # get the grid search parameters (e.g. a scoring function)
     grid_search_params = configs.get("grid_search_params", {})
+    cv = configs.get("cv", 5)  # default to standard 5-fold if not specified
     # create pipeline with preprocessing steps and the model
     pipeline = Pipeline([*preprocessing_steps, ("model", model_cls)])
     # split into train/test
@@ -52,7 +53,13 @@ def train(configs: dict) -> dict:
         random_state=configs.get("random_state", 42),
     )
     # create the model
-    model = GridSearchCV(pipeline, configs["param_grid"], **grid_search_params)
+    model = GridSearchCV(
+        pipeline,
+        configs["param_grid"],
+        verbose=verbosity,
+        cv=cv,
+        **grid_search_params
+        )
     # train model
     print("Training model...")
     model.fit(X_train, y_train)
