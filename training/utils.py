@@ -21,6 +21,7 @@ class ModelMetadata(TypedDict):
     test_score: dict
     classes: list[str]
     task: str
+    training_cutoff: str
 
 
 def apply_preprocessing_for_names(

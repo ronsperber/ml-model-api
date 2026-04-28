@@ -65,6 +65,7 @@ def train(
         random_state=configs.get("random_state", 42),
         shuffle=configs.get("shuffle", True),
     )
+    training_cutoff = str(X.index[-1])
     # create the model
     model = GridSearchCV(
         pipeline,
@@ -89,6 +90,7 @@ def train(
     if refit_full:
         print("Training on full data...")
         model.fit(X,y) #type: ignore
+        training_cutoff = str(X.index[-1])
         print("Training on full data complete")
     feature_importances = []
     model_estimator = model["model"] # type: ignore
@@ -101,6 +103,7 @@ def train(
         "best_params": best_params,
         "test_score": {score_label: score},
         "classes": classes,
-        "task": configs.get("task", "classification")
+        "task": configs.get("task", "classification"),
+        "training_cutoff": training_cutoff,
     }
     return {"model": model, "metadata": metadata}
