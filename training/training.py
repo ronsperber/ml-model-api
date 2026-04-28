@@ -1,7 +1,6 @@
 """
 module to train models on data
 """
-
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -9,13 +8,21 @@ import pandas as pd
 from .utils import get_feature_names_from_fitted_pipeline
 
 
-def train(configs: dict, verbosity=0) -> dict:
+def train(
+        configs: dict,
+        verbosity:int = 0,
+        refit_full:bool = False,
+        ) -> dict:
     """
     Function to read configs for a model, train and return the model and metadata
     Parameters
     ----------
     configs : dict
         dict that has all the configs for a particular dataset needed for training
+    verbosity : int
+        verbosity to use for grid search
+    refit_full : bool
+        whether to retrain on the full dataset.
     Returns
     -------
     dict
@@ -30,9 +37,11 @@ def train(configs: dict, verbosity=0) -> dict:
     X = df.drop(columns=[configs["target_col"]])
     y_raw = df[configs["target_col"]]
     # encode the labels numerically for classification 
+    classes = []
     if configs.get("task","classification") == "classification":
         le = LabelEncoder()
         y = le.fit_transform(y_raw)
+        classes = list(le.classes_)
     else: # for regression extract the values
         y = y_raw.values
     # get the preprocessing steps
@@ -66,26 +75,32 @@ def train(configs: dict, verbosity=0) -> dict:
         **grid_search_params
         )
     # train model
-    print("Training model...")
+    print("Finding best hyperparameters")
     model.fit(X_train, y_train)
     # Extract names from best estimator
     best_pipe = model.best_estimator_
+    best_params = model.best_params_
     feature_names = get_feature_names_from_fitted_pipeline(best_pipe, X_train)
-    print("Training complete.")
+    print("Hyperparameter tuning complete.")
     score = model.score(X_test, y_test)
     score_label = configs.get("score_label", "accuracy")
     # get feature importances if the model records them
+    model = model.best_estimator_
+    if refit_full:
+        print("Training on full data...")
+        model.fit(X,y) #type: ignore
+        print("Training on full data complete")
     feature_importances = []
-    model_estimator = model.best_estimator_["model"]
+    model_estimator = model["model"] # type: ignore
     if hasattr(model_estimator, "feature_importances_"):
         feature_importances = model_estimator.feature_importances_.tolist()
     metadata = {
         "model_type": configs["model_type"].__name__,
         "features": feature_names,
         "feature_importances": feature_importances,
-        "best_params": model.best_params_,
+        "best_params": best_params,
         "test_score": {score_label: score},
-        "classes": list(le.classes_),
+        "classes": classes,
         "task": configs.get("task", "classification")
     }
     return {"model": model, "metadata": metadata}

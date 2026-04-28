@@ -55,9 +55,16 @@ parser.add_argument(
     default=0,
     help="verbosity of GridSearchCV",
 )
+parser.add_argument(
+    "--refit-full",
+    action="store_true",
+    default=False,
+    help="Refit best model on full dataset after grid search",
+)
 args = parser.parse_args()
 key = args.config_key
 verbosity=args.verbosity
+refit_full = args.refit_full
 # train the model and get the model and metadata
 if key in TRAIN_CONFIG:
     configs = TrainConfig(**TRAIN_CONFIG[key])
@@ -66,7 +73,7 @@ else:
         f"{key} is not a valid key. Valid keys are {list(TRAIN_CONFIG.keys())}"
     )
 start = time.perf_counter()
-train_results = train(configs.model_dump(), verbosity=verbosity)
+train_results = train(configs.model_dump(), verbosity=verbosity, refit_full=refit_full)
 end = time.perf_counter()
 print(f"Training took {end - start:.4f} seconds")
 model = train_results["model"]
