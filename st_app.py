@@ -8,13 +8,17 @@ from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 import pandas as pd
 from config.schema import schemas
+from config.train_config import TRAIN_CONFIG
 from training.utils import get_feature_importances
 
 load_dotenv()
 API_HOST = os.getenv("API_HOST", "http://127.0.0.1:8000")
 st.title("Model Predictions")
 # Get the model being used to make a prediction
-model_name = st.sidebar.selectbox(label="Model name", options=list(schemas.keys()))
+# only use classification models
+classification_models = [k for k in schemas.keys()
+                         if TRAIN_CONFIG.get(k, {}).get("task", "classification") == "classification"]
+model_name = st.sidebar.selectbox(label="Model name", options=classification_models)
 # Get the mode (single prediction or batch mode)
 mode = st.sidebar.selectbox(
     label="Predict mode", options=["Predict single", "Predict batch (csv)"]

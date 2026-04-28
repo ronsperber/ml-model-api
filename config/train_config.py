@@ -4,8 +4,11 @@ training configs for models
 
 from sklearn.ensemble import RandomForestClassifier
 from lightgbm import LGBMClassifier
+from xgboost import XGBRegressor
+from sklearn.model_selection import TimeSeriesSplit  
 from sklearn.metrics import make_scorer, fbeta_score
 from preprocessing_steps.loan_data import loan_steps
+from preprocessing_steps.fred import fred_steps
 
 # note: score_label should match the scoring metric set in grid_search_params
 TRAIN_CONFIG = {
@@ -51,4 +54,29 @@ TRAIN_CONFIG = {
         "model_output": "models/loan.pkl",
         "metadata_output": "metadata/loan.json",
     },
+    "fred_data": {
+        "dataset_path": "data/fred_processed.csv",
+        "index_col": "sasdate",
+        "target_col": "UNRATE",
+        "model_type": XGBRegressor,
+        "test_size": 0.2,
+        "random_state": 42,
+        "min_score": -1.5,
+        "score_label": "Neg MAE",
+        "model_params": {"random_state": 42},
+        "grid_search_params" : {"scoring" : "neg_mean_absolute_error"},
+        "cv": TimeSeriesSplit(),
+        "task": "regression",
+        "shuffle": False,
+        "preprocessing_steps": fred_steps,
+        "model_output": "models/fred.pkl",
+        "metadata_output": "metadata/fred.json",
+        "param_grid":  {
+            "model__n_estimators": [100, 200, 300],
+            "model__max_depth": [3, 4, 5],
+            "model__learning_rate": [0.05, 0.1, 0.2],
+            "model__subsample": [0.8, 1.0],
+            "model__colsample_bytree": [0.8, 1.0],
+            }
+    }
 }

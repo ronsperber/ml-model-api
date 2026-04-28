@@ -35,7 +35,7 @@ def train(
         df = df.set_index(configs["index_col"])
     # get the feature set
     X = df.drop(columns=[configs["target_col"]])
-    y_raw = df[configs["target_col"]]
+    y_raw:pd.Series = df[configs["target_col"]]
     # encode the labels numerically for classification 
     classes = []
     if configs.get("task","classification") == "classification":
