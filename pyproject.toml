@@ -25,6 +25,7 @@ dependencies = [
     "category-encoders>=2.8.1",
     "lightgbm>=4.6.0",
     "xgboost>=3.2.0",
+    "pyfredapi>=0.10.2",
 ]
 
 [project.optional-dependencies]

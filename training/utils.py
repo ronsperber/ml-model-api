@@ -20,6 +20,7 @@ class ModelMetadata(TypedDict):
     best_params: dict
     test_score: dict
     classes: list[str]
+    task: str
 
 
 def apply_preprocessing_for_names(

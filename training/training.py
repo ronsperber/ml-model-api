@@ -29,9 +29,12 @@ def train(configs: dict, verbosity=0) -> dict:
     # get the feature set
     X = df.drop(columns=[configs["target_col"]])
     y_raw = df[configs["target_col"]]
-    # encode the labels numerically
-    le = LabelEncoder()
-    y = le.fit_transform(y_raw)
+    # encode the labels numerically for classification 
+    if configs.get("task","classification") == "classification":
+        le = LabelEncoder()
+        y = le.fit_transform(y_raw)
+    else: # for regression extract the values
+        y = y_raw.values
     # get the preprocessing steps
     preprocessing_steps = configs.get("preprocessing_steps", [])
     # get the model type
@@ -51,6 +54,7 @@ def train(configs: dict, verbosity=0) -> dict:
         y,
         test_size=configs.get("test_size", 0.2),
         random_state=configs.get("random_state", 42),
+        shuffle=configs.get("shuffle", True),
     )
     # create the model
     model = GridSearchCV(
@@ -58,6 +62,7 @@ def train(configs: dict, verbosity=0) -> dict:
         configs["param_grid"],
         verbose=verbosity,
         cv=cv,
+        n_jobs=-1,
         **grid_search_params
         )
     # train model
@@ -81,5 +86,6 @@ def train(configs: dict, verbosity=0) -> dict:
         "best_params": model.best_params_,
         "test_score": {score_label: score},
         "classes": list(le.classes_),
+        "task": configs.get("task", "classification")
     }
     return {"model": model, "metadata": metadata}

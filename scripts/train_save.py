@@ -5,7 +5,8 @@ import json
 import os
 import warnings
 from typing import List, Type, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from sklearn.model_selection import BaseCrossValidator
 import argparse
 import time
 
@@ -13,6 +14,7 @@ import time
 # create TrainConfig class
 # used to validate a valid TRAIN_CONFIGS[key]
 class TrainConfig(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     dataset_path: str
     index_col: str | None = None
     target_col: str
@@ -27,6 +29,9 @@ class TrainConfig(BaseModel):
     score_label: str = "accuracy"
     model_output: str
     metadata_output: str
+    cv: int | BaseCrossValidator | None = 5
+    shuffle: bool = True
+    task: str = "classification"
 
 
 # suppress sklearn UserWarnings (e.g. convergence warnings during grid search)
