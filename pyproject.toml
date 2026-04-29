@@ -26,6 +26,7 @@ dependencies = [
     "lightgbm>=4.6.0",
     "xgboost>=3.2.0",
     "pyfredapi>=0.10.2",
+    "plotly>=6.7.0",
 ]
 
 [project.optional-dependencies]
