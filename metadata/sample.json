@@ -1,0 +1,30 @@
+{
+  "model_type": "RandomForestClassifier",
+  "features": [
+    "SepalLengthCm",
+    "SepalWidthCm",
+    "PetalLengthCm",
+    "PetalWidthCm",
+    "petal_area",
+    "sepal_area"
+  ],
+  "feature_importances": [
+    0.11801112059588512,
+    0.05725862512106463,
+    0.1931872509061094,
+    0.29381462216137744,
+    0.30881983814781583,
+    0.028908543067747615
+  ],
+  "best_params": {
+    "model__n_estimators": 20
+  },
+  "test_score": {
+    "accuracy": 1.0
+  },
+  "classes": [
+    "Iris-setosa",
+    "Iris-versicolor",
+    "Iris-virginica"
+  ]
+}

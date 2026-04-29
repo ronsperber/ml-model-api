@@ -9,9 +9,8 @@ app.log
 *.pyc
 local
 .pytest_cache
-models/
-metadata/
-*.pkl
+
+
 # Package build artifacts
 *.egg-info/
 dist/
