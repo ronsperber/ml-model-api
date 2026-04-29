@@ -24,8 +24,11 @@ ml-model-api/
 ├── config/
 │   ├── schema.py               # Pydantic schemas for each dataset (input validation)
 │   └── train_config.py         # Training configs (model type, params, paths, grid search)
+├── loaders/
+│   └── fred_data.py            # for loading FRED data 
 ├── preprocessing_steps/
 │   └── loan_data.py            # Custom preprocessing transformers
+│   └── fred.py                 # Custom preprocessing for FRED data
 ├── scripts/
 │   └── train_save.py           # Training entrypoint (CLI)
 ├── serve/
@@ -38,6 +41,7 @@ ml-model-api/
 ├── data/                       # Sample datasets (included for reproducibility)
 ├── app.py                      # FastAPI app with /predict, /predict_batch, /metadata
 └── st_app.py                   # Streamlit frontend
+└── st_fred_app.py              # Streamlit frontend for FRED unemployment data
 ```
 
 ---
@@ -251,6 +255,9 @@ pytest unittests/
 | `random_state` | Random seed (default `42`) |
 | `min_score` | Minimum test score required to save the model |
 | `score_label` | Label for the score metric in metadata (default `"accuracy"`) |
+| `task` | Whether the model is for classification or regression |
+| `shuffle` | Whether or not to shuffle for train/test split (use `False` for time-series data) |
+| `cv` | Either number of folds to cross-validate or method use (e.g. `TimeSeriesSplit()` for time-series data) |
 | `model_output` | Path to save the trained model |
 | `metadata_output` | Path to save model metadata |
 
@@ -267,6 +274,7 @@ pytest unittests/
 - Pydantic
 - Joblib
 - python-dotenv
+- plotly
 
 See `requirements.txt` for pinned versions.
 
