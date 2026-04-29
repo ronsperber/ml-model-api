@@ -74,7 +74,7 @@ cp .env.example .env
 
 ### Data
 
-Sample datasets (Iris, loan) are included in `data/` so you can run the project immediately after cloning. To add your own dataset see [Adding a New Dataset](#adding-a-new-dataset).
+Sample datasets (Iris, loan, FRED data) are included in `data/` so you can run the project immediately after cloning. To add your own dataset see [Adding a New Dataset](#adding-a-new-dataset).
 
 ### Train a model
 
@@ -88,7 +88,7 @@ This will:
 - Evaluate on a held-out test set
 - Save the model and metadata only if the test score meets the `min_score` threshold
 
-Available config keys out of the box: `iris`, `loan`
+Available config keys out of the box: `iris`, `loan_data`,`fred_data`
 
 ### Start the API
 
