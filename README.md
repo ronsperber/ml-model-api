@@ -59,6 +59,10 @@ Or using the requirements file:
 ```bash
 pip install -r requirements.txt
 ```
+With uv : 
+```bash
+uv sync
+```
 
 ### Environment setup
 
