@@ -1,6 +1,8 @@
 # FastAPI application for ML model serving.
 # Start with: uvicorn app:app --reload
 import logging
+import psutil
+import os
 from fastapi import FastAPI, Query, Body, HTTPException
 import pandas as pd
 from config.schema import schemas
@@ -26,6 +28,13 @@ app = FastAPI()
 logger.info("Starting endpoints")
 model_store = ModelStore(schemas, TRAIN_CONFIG)
 
+import psutil
+import os
+
+@app.get("/memory")
+def memory():
+    process = psutil.Process(os.getpid())
+    return {"memory_mb": process.memory_info().rss / 1024 / 1024}
 
 @app.post("/predict")
 def predict(
@@ -65,22 +74,28 @@ def predict(
     X = pd.DataFrame([validated.model_dump()])
     # Run prediction
     logger.info(f"Model for {dataset} making prediction")
-    # if we can predict probabilities do that
-    if hasattr(model, "predict_proba"):
-        y_pred_proba = list(model.predict_proba(X))[0]
-        # determine which is the predicted label
-        y_pred = int(y_pred_proba.argmax())
-        # convert the probability array to list
-        y_pred_proba_list = y_pred_proba.tolist()
-    else:
-        # if no predict_proba exists, use the predict method to
-        # get the prediction and use empty list for probabilities
+    # first for classification 
+    if metadata.get("task", "classification") == "classification":
+        # if we can predict probabilities do that
+        if hasattr(model, "predict_proba"):
+            y_pred_proba = list(model.predict_proba(X))[0]
+            # determine which is the predicted label
+            y_pred = int(y_pred_proba.argmax())
+            # convert the probability array to list
+            y_pred_proba_list = y_pred_proba.tolist()
+        else:
+            # if no predict_proba exists, use the predict method to
+            # get the prediction and use empty list for probabilities
+            y_pred = model.predict(X)[0]
+            y_pred_proba_list = []
+        pred_label = classes[y_pred]
+        probs = dict(zip(classes, y_pred_proba_list))
+        logger.info(f"Model for {dataset} prediction returned")
+        return {"predicted_label": pred_label, "predicted_probs": probs}
+    else: # regression here
         y_pred = model.predict(X)[0]
-        y_pred_proba_list = []
-    pred_label = classes[y_pred]
-    probs = dict(zip(classes, y_pred_proba_list))
-    logger.info(f"Model for {dataset} prediction returned")
-    return {"predicted_label": pred_label, "predicted_probs": probs}
+        logger.info(f"Model for {dataset} prediction returned")
+        return {"predicted_value": y_pred}
 
 
 @app.post("/predict_batch")
@@ -126,27 +141,38 @@ def predict_batch(
             raise HTTPException(status_code=400, detail=f"Invalid row {i}: {e}")
     # convert to dataframe
     X = pd.DataFrame(validated_rows)
+    X = X[metadata["features"]]
     logger.info(f"Model for {dataset} making prediction")
-    # get the classes
-    classes = metadata["classes"]
-    # if we can predict probabilities do that
-    if hasattr(model, "predict_proba"):
-        y_proba = model.predict_proba(X)
-        # determine which is the predicted label
-        y_pred = y_proba.argmax(axis=-1)
+    if metadata.get("task", "classification") == "classification":
+        # get the classes
+        classes = metadata["classes"]
+        # if we can predict probabilities do that
+        if hasattr(model, "predict_proba"):
+            y_proba = model.predict_proba(X)
+            # determine which is the predicted label
+            y_pred = y_proba.argmax(axis=-1)
+        else:
+            # if no predict_proba exists, use the predict method to
+            # get the prediction and use empty list for probabilities
+            y_pred = model.predict(X)
+            y_proba = None
+        response = []
+        for i, pred_idx in enumerate(y_pred):
+            probs = y_proba[i] if y_proba is not None else {}
+            obj = {
+                "predicted_label": classes[pred_idx],
+                "predicted_probs": dict(zip(classes, probs)),
+            }
+            response.append(obj)
     else:
-        # if no predict_proba exists, use the predict method to
-        # get the prediction and use empty list for probabilities
         y_pred = model.predict(X)
-        y_proba = None
-    response = []
-    for i, pred_idx in enumerate(y_pred):
-        probs = y_proba[i] if y_proba is not None else {}
-        obj = {
-            "predicted_label": classes[pred_idx],
-            "predicted_probs": dict(zip(classes, probs)),
-        }
-        response.append(obj)
+        response = []
+        for pred in y_pred:
+            obj = {
+                "predicted_value": float(pred)
+            }
+            response.append(obj)
+
     logger.info(f"Model for {dataset} prediction returned")
     return {"response": response}
 

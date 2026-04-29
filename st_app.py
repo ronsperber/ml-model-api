@@ -1,4 +1,5 @@
 import requests
+import math
 import streamlit as st
 from typing import Type, get_origin, get_args
 from enum import Enum
@@ -182,6 +183,7 @@ else:  # for batch predictions
                 df_req = df[list(required_fields)]
                 # convert to list of dicts
                 df_dict = df_req.to_dict(orient="records")
+                df_dict = [{k: (None if isinstance(v, float) and math.isnan(v) else v) for k, v in row.items()} for row in df_dict]
                 # put payload in form expected
                 payload = {"items": df_dict}
                 # get result from this CSV
@@ -208,11 +210,11 @@ else:  # for batch predictions
                 if df_out.shape[0] * df_out.shape[1] <= MAX_STYLED_CELLS:
                     st.dataframe(
                         df_out.style.highlight_max(axis=1, subset=probs_df.columns),
-                        use_container_width=True,
+                        width='stretch',
                     )
                 else:
                     st.caption("Probability highlighting disabled for large datasets.")
-                    st.dataframe(df_out, use_container_width=True)
+                    st.dataframe(df_out, width='stretch')
 
 # if requested show the feature importances for the model
 get_feature_imp = st.sidebar.button("See feature importances")
@@ -225,4 +227,4 @@ if get_feature_imp:
         "feature"
     )
     styled = feature_df.style.format("{:.4f}")
-    st.sidebar.dataframe(styled, use_container_width=True)
+    st.sidebar.dataframe(styled, width='stretch')
