@@ -199,3 +199,13 @@ def get_metadata(dataset: str = Query("iris", description="Dataset chosen")) -> 
         raise HTTPException(status_code=404, detail=str(e))
 
     return metadata
+
+@app.post("/reload")
+def reload_model(dataset: str = Query(..., description="Dataset to reload")):
+    # force reload by removing from cache first
+    model_store.models.pop(dataset, None)
+    model_store.metadata.pop(dataset, None)
+    model_store.load(dataset)
+    logger.info(f"Model for {dataset} reloaded")
+    return {"status": "reloaded", "dataset": dataset}
+
