@@ -12,7 +12,9 @@ import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-load_dotenv()
+from pathlib import Path
+env_path = Path.home() / ".secrets" / "ml-model-api" / ".env"
+load_dotenv(env_path)
 def get_secret(key: str, default: str = "") -> str:
     try:
         return st.secrets.get(key, "") or os.environ.get(key, default)
@@ -45,7 +47,7 @@ metadata = fetch_metadata(MODEL_NAME)
 training_cutoff_str = metadata["training_cutoff"]  
 training_cutoff = datetime.strptime(training_cutoff_str, "%m/%d/%Y")
 last_data_date = training_cutoff + relativedelta(months=1)  
-next_pred_date = training_cutoff + relativedelta(months=2)  
+
 schema = schemas[MODEL_NAME]
 index_col= config.get("index_col")
 target_col = config.get("target_col")
@@ -74,6 +76,8 @@ if "dataset" in st.session_state:
         next_pred = float(y_pred[-1])
         df["predicted"] = pd.Series(y_pred, index=df.index).shift(1)
         df.index = pd.to_datetime(df.index)
+        last_date = pd.to_datetime(df.index[-1])
+        next_pred_date = last_date + relativedelta(months=1)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df.index, y=df["UNRATE"], name="True UNRATE", mode="lines"))
         fig.add_trace(go.Scatter(x=df.index, y=df["predicted"], name="Predicted UNRATE", mode="lines", line=dict(dash="dash")))
